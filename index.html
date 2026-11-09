@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponceano Multiservicios | Soluciones Confiables</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        header {
+            background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .logo-container {
+            margin-bottom: 1rem;
+        }
+        .logo-container img {
+            max-width: 180px;
+            height: auto;
+            border-radius: 8px;
+        }
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        nav {
+            background: #222;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        nav ul li a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        nav ul li a:hover {
+            background: #0056b3;
+        }
+        section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        section h2 {
+            text-align: center;
+            color: #0056b3;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #0056b3;
+            display: inline-block;
+        }
+        .section-header {
+            text-align: center;
+        }
+        .servicios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .servicio-card {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+        .servicio-card:hover {
+            transform: translateY(-5px);
+        }
+        .servicio-card h3 {
+            color: #0056b3;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+        .contacto-info {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .contacto-info p {
+            margin-bottom: 0.7rem;
+            font-size: 1rem;
+        }
+        .aviso-transferencia {
+            background: #f0f7ff;
+            border-left: 4px solid #0056b3;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .boton-pago {
+            display: inline-block;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 8px;
+            transition: opacity 0.3s;
+        }
+        .boton-whatsapp {
+            background: #25D366;
+        }
+        .boton-paypal {
+            background: #003087;
+        }
+        .boton-pago:hover {
+            opacity: 0.9;
+        }
+        .opciones-pago {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px dashed #ccc;
+        }
+        .redes-sociales {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px dashed #ccc;
+        }
+        .redes-sociales h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .redes-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .redes-container a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .redes-container a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        footer {
+            background: #222;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        @media(max-width: 600px) {
+            nav ul li a {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+            section {
+                padding: 2rem 1rem;
+            }
+            .logo-container img {
+                max-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <img src="logo.png" alt="Ponceano Multiservicios">
+    </div>
+    <h1>🔧 Ponceano Multiservicios</h1>
+    <p>Seguridad • Energía Solar • Aire Acondicionado • Construcción • Servicios Contables DGII</p>
+</header>
+
+<nav>
+    <ul>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#contacto">Contacto y Pago</a></li>
+    </ul>
+</nav>
+
+<section id="inicio">
+    <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+        <h2>Bienvenidos</h2>
+        <p style="font-size: 1.1rem; margin-top: 1rem;">
+            Somos una empresa dedicada a ofrecer soluciones integrales para su hogar y su negocio. 
+            Calidad, confianza y compromiso en cada servicio que ofrecemos. Ubicados en el este de la República Dominicana.
+        </p>
+    </div>
+</section>
+
+<section id="servicios">
+    <div class="section-header">
+        <h2>Nuestros Servicios</h2>
+    </div>
+    <div class="servicios-grid">
+        <div class="servicio-card">
+            <h3>🔒 Sistemas de Seguridad</h3>
+            <p>Instalación y mantenimiento de cámaras de vigilancia, alarmas y control de acceso.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>☀️ Energía Solar</h3>
+            <p>Asesoría, venta e instalación de paneles solares y sistemas de respaldo energético.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>❄️ Aire Acondicionado</h3>
+            <p>Instalación, reparación y mantenimiento de equipos de aire acondicionado de todas las marcas.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>🏗️ Construcción y Remodelación</h3>
+            <p>Obras civiles, remodelaciones, acabados y mantenimiento de estructuras residenciales y comerciales.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>📋 Gestión DGII y Contabilidad</h3>
+            <p>Declaraciones fiscales, envío de comprobantes fiscales, gestión de facturas y registros tributarios.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>🔧 Mantenimiento General</h3>
+            <p>Servicios de plomería, electricidad, pintura y reparaciones en general para su propiedad.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>📊 Declaración Mensual y Anual</h3>
+            <p>Preparación y envío de declaraciones mensuales y anuales ante la DGII.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>📤 Envío de Comprobantes Fiscales</h3>
+            <p>Emisión y envío de NCF y comprobantes fiscales electrónicos según normativa vigente.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>📥 Recepción y Organización de Facturas</h3>
+            <p>Recepción, clasificación y archivo digital de facturas de compras y gastos.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>🏠 Proyectos Residenciales</h3>
+            <p>Diseño, construcción y remodelación de viviendas, ampliaciones y acabados de calidad.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>🏢 Proyectos Comerciales</h3>
+            <p>Construcción y acondicionamiento de locales comerciales, oficinas y pequeñas empresas.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>⚡ Instalaciones Eléctricas</h3>
+            <p>Instalaciones eléctricas residenciales y comerciales, reparaciones y cumplimiento normativo.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>🔧 Mantenimiento de Equipos</h3>
+            <p>Programas de mantenimiento preventivo y correctivo para equipos de su negocio u hogar.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>📑 Trámites y Asesoría</h3>
+            <p>Asesoría en trámites municipales, permisos y gestiones ante entidades públicas.</p>
+        </div>
+        <div class="servicio-card">
+            <h3>🌿 Soluciones Eficientes</h3>
+            <p>Mejoras para reducir el consumo de energía, optimizar recursos y cuidar el medio ambiente.</p>
+        </div>
+    </div>
+</section>
+
+<section id="nosotros">
+    <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+        <h2>Sobre Nosotros</h2>
+        <p style="margin-top: 1rem; font-size: 1.05rem;">
+            <strong>Ponceano Multiservicios</strong> es una empresa fundada con el propósito de ofrecer 
+            soluciones prácticas y confiables a familias y negocios de la región Este de la República Dominicana.
+        </p>
+        <p style="margin-top: 1rem; font-size: 1.05rem;">
+            Nuestro compromiso es brindar un servicio honesto, profesional y accesible, respaldado por 
+            experiencia en cada área que atendemos. Su satisfacción es nuestra prioridad.
+        </p>
+    </div>
+</section>
+
+<section id="contacto">
+    <div class="section-header">
+        <h2>Contacto y Formas de Pago</h2>
+    </div>
+    <div class="contacto-info">
+        <p><strong>📧 Correo:</strong> ponceanomultiservicios@gmail.com</p>
+        <p><strong>📱 WhatsApp:</strong> +1 (829) 665-4316 &nbsp;|&nbsp; +1 (849) 531-3660</p>
+        <p><strong>📍 Ubicación:</strong> República Dominicana</p>
+        
+        <div class="aviso-transferencia">
+            <p><strong>🏦 Pago por transferencia bancaria:</strong> Si desea pagar mediante transferencia bancaria, 
+            por favor contáctenos por correo o WhatsApp y le enviaremos los datos bancarios completos. 
+            ¡Gracias!</p>
+        </div>
+        
+        <div class="opciones-pago">
+            <h3 style="color: #333; margin-bottom: 20px;">💳 Formas de Pago</h3>
+            <p style="margin-bottom: 15px; color: #666;">Elige la opción que te sea más conveniente:</p>
+            
+            <a href="https://wa.me/18296654316?text=Hola,%20necesito%20información%20para%20realizar%20un%20pago" target="_blank" class="boton-pago boton-whatsapp">
+                💬 Pagar por WhatsApp
+            </a>
+            
+            <a href="https://paypal.me/wponceano" target="_blank" class="boton-pago boton-paypal">
+                💳 Pagar con PayPal
+            </a>
+            
+            <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
+                ⚠️ Con PayPal puedes escribir el monto exacto que deseas pagar. ¡Sin montos mínimos ni máximos!
+            </p>
+        </div>
+
+        <div class="redes-sociales">
+            <h3>🌐 Síguenos en Nuestras Redes</h3>
+            <div class="redes-container">
+                <!-- Facebook -->
+                <a href="https://facebook.com/ponceano_multiservicios" target="_blank" style="background: #1877F2;">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.514c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+                <!-- Instagram -->
+                <a href="https://instagram.com/ponceano_multiservicios" target="_blank" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.058 1.281-.07 1.689-.07 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.07 4.948.07 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                </a>
+                <!-- YouTube -->
+                <a href="https://www.youtube.com/@ponceanomultiservicios9227" target="_blank" style="background: #FF0000;">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+                <!-- TikTok -->
+                <a href="https://www.tiktok.com/@ponceano_multiservicios" target="_blank" style="background: #000000;">
+                    <svg width="2
