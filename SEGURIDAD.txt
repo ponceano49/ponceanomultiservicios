@@ -1,0 +1,18 @@
+SEGURIDAD DEL SITIO
+
+GitHub Pages no permite configurar cabeceras HTTP personalizadas mediante archivos HTML, CSS, metaetiquetas o un archivo _headers. Las cabeceras siguientes son una preparación para un servidor o CDN que permita configurarlas; todavía no están activas en GitHub Pages.
+
+1. Antes de activar la redirección obligatoria a HTTPS, corrija el DNS del dominio raíz: al revisar el 22-11-2026 había registros A ajenos a GitHub Pages (15.197.225.128 y 3.33.251.168) junto a los cuatro de GitHub. Verifique la configuración completa con su proveedor de DNS, la propiedad del dominio y la validez del certificado para el dominio raíz y www. No elimine registros sin confirmar su finalidad. Después active «Enforce HTTPS» en la configuración de GitHub Pages y compruebe ambos dominios por HTTPS.
+
+2. En un CDN o servidor que acepte cabeceras, configure primero una política de prueba, sin bloquear contenido. Esta política contempla el CSS inline actual; el botón de PayPal es un enlace externo, no un formulario ni un recurso integrado:
+
+Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; report-to csp-endpoint
+Reporting-Endpoints: csp-endpoint="https://DOMINIO-PROPIO/ruta-de-informes-csp"
+Referrer-Policy: strict-origin-when-cross-origin
+X-Content-Type-Options: nosniff
+
+DOMINIO-PROPIO y la ruta son marcadores, no un servicio real. Sustitúyalos por un receptor HTTPS bajo su control, habilitado para recibir informes CSP, antes de configurar la cabecera. Los informes pueden contener direcciones de páginas; proteja el acceso y establezca un período de retención. Si se requiere compatibilidad con navegadores antiguos, configure también report-uri con el mismo receptor compatible.
+
+3. Compruebe las cabeceras en las respuestas HTTPS reales y revise los informes. Pruebe el sitio en móvil y escritorio, incluida la apertura de PayPal y WhatsApp, antes de pasar de Report-Only a Content-Security-Policy. No agregue HSTS hasta que HTTPS funcione correctamente en todos los dominios que vaya a cubrir.
+
+4. El enlace de pago es fijo y apunta a https://paypal.me/wponceano, que redirige al dominio oficial www.paypal.me. Verifique con PayPal que el perfil corresponde al destinatario deseado antes de recibir pagos. La página actual no tiene formulario de contacto; si se agrega uno, no debe solicitar contraseñas, códigos, tarjetas ni datos bancarios, y se deberá revisar la política CSP y el tratamiento de datos.
