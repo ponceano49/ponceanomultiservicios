@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.RateLimiting;
+using Npgsql;
 using PonceanoLicenciaAPI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,7 @@ builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.P
 if (builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("Storage:EnableInMemory"))
     builder.Services.AddSingleton<ILicenciaRepository, LicenciaRepositoryMemoria>();
 else
-    builder.Services.AddSingleton<ILicenciaRepository, PostgresLicenciaRepository>();
+    builder.Services.AddScoped<ILicenciaRepository, PostgresLicenciaRepository>();
 builder.Services.AddFirebaseIdTokenAuthentication(builder.Configuration);
 builder.Services.AddHttpClient<PayPalVerifier>(client => client.Timeout = TimeSpan.FromSeconds(15))
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
@@ -34,10 +35,32 @@ builder.Services.AddRateLimiter(options =>
         { PermitLimit = 120, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
 var app = builder.Build();
-await using (var startupScope = app.Services.CreateAsyncScope())
+var etapaInicio = "resolver el repositorio de licencias";
+try
 {
+    await using var startupScope = app.Services.CreateAsyncScope();
     if (startupScope.ServiceProvider.GetRequiredService<ILicenciaRepository>() is PostgresLicenciaRepository postgres)
+    {
+        etapaInicio = "conectar PostgreSQL y preparar el esquema";
         await postgres.EnsureCreatedAsync(CancellationToken.None);
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogCritical("No se pudo {Etapa}; la API no arrancará. Revise la configuración y conectividad de PostgreSQL. No se registran mensajes de excepción porque pueden contener secretos.", etapaInicio);
+    app.Logger.LogError("Configuración no vacía: ConnectionStrings__Licencias={CadenaConfigurada}; DATABASE_URL={UrlConfigurada}.",
+        !string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("Licencias")),
+        !string.IsNullOrWhiteSpace(app.Configuration["DATABASE_URL"]));
+    for (Exception? actual = ex; actual is not null; actual = actual.InnerException)
+    {
+        app.Logger.LogError("Tipo de excepción: {Tipo}; SQLSTATE: {SqlState}; error de socket: {SocketError}",
+            actual.GetType().FullName,
+            (actual as PostgresException)?.SqlState,
+            (actual as System.Net.Sockets.SocketException)?.SocketErrorCode.ToString());
+    }
+    await app.DisposeAsync();
+    Environment.ExitCode = 1;
+    return;
 }
 app.UseRateLimiter();
 app.UseAuthentication();
