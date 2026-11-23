@@ -20,9 +20,15 @@ builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.P
 if (builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("Storage:EnableInMemory"))
     builder.Services.AddSingleton<ILicenciaRepository, LicenciaRepositoryMemoria>();
 else
-    builder.Services.AddScoped<ILicenciaRepository, PostgresLicenciaRepository>();
+{
+    builder.Services.AddScoped<PostgresLicenciaRepository>();
+    builder.Services.AddScoped<ILicenciaRepository>(services => services.GetRequiredService<PostgresLicenciaRepository>());
+    builder.Services.AddScoped<IPayPalPaymentStore>(services => services.GetRequiredService<PostgresLicenciaRepository>());
+}
 builder.Services.AddFirebaseIdTokenAuthentication(builder.Configuration);
 builder.Services.AddHttpClient<PayPalVerifier>(client => client.Timeout = TimeSpan.FromSeconds(15))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+builder.Services.AddHttpClient<PayPalPaymentsClient>(client => client.Timeout = TimeSpan.FromSeconds(20))
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 builder.Services.AddRateLimiter(options =>
 {
@@ -117,7 +123,56 @@ app.MapPost("/api/licencia/activar-manual", async (HttpContext context, Activaci
     }
 }).RequireAuthorization().RequireRateLimiting("licencia");
 
-app.MapPost("/api/pago/webhook", async (HttpRequest request, PayPalVerifier verifier, ILogger<Program> logger, CancellationToken cancellationToken) =>
+app.MapPost("/api/pago/orden", async (HttpContext context, SolicitudOrdenPago solicitud, PayPalPaymentsClient paypal, CancellationToken cancellationToken) =>
+{
+    if (!FirebaseAuthentication.TryGetVerifiedEmail(context.User, out var correo))
+        return Results.Forbid();
+    if (!PlanPago.TryObtener(solicitud.Plan, out var plan))
+        return Results.BadRequest(new { error = "Seleccione el plan mensual o anual." });
+    var store = context.RequestServices.GetService<IPayPalPaymentStore>();
+    if (store is null)
+        return Results.Problem("El almacenamiento PostgreSQL de pagos no está disponible.", statusCode: 503);
+    try
+    {
+        var referencia = Guid.NewGuid().ToString("N");
+        var orden = await paypal.CrearOrdenAsync(referencia, plan, cancellationToken);
+        await store.RegistrarOrdenAsync(orden.Id, referencia, correo, plan, cancellationToken);
+        return Results.Ok(new { ordenId = orden.Id, plan = plan.Codigo, importe = plan.ImporteUsd, moneda = "USD", urlAprobacion = orden.UrlAprobacion });
+    }
+    catch (PayPalUnavailableException)
+    {
+        return Results.Problem("No se pudo iniciar el pago en PayPal Sandbox.", statusCode: 503);
+    }
+}).RequireAuthorization().RequireRateLimiting("licencia");
+
+app.MapGet("/api/pago/retorno", async (string? token, HttpContext context, PayPalPaymentsClient paypal, ILogger<Program> logger, CancellationToken cancellationToken) =>
+{
+    var store = context.RequestServices.GetService<IPayPalPaymentStore>();
+    if (string.IsNullOrWhiteSpace(token) || store is null)
+        return Results.Content("<html><body><h1>No se pudo verificar el pago</h1><p>Vuelve a PonceanoFacturador y contacta al administrador.</p></body></html>", "text/html; charset=utf-8", statusCode: StatusCodes.Status400BadRequest);
+    try
+    {
+        var ordenExistente = await store.BuscarOrdenAsync(token, cancellationToken);
+        if (ordenExistente is null)
+            return Results.Content("<html><body><h1>Orden no reconocida</h1><p>Contacta al administrador.</p></body></html>", "text/html; charset=utf-8", statusCode: StatusCodes.Status404NotFound);
+        var pago = await paypal.CapturarYVerificarOrdenAsync(token, null, capturar: true, cancellationToken);
+        if (pago is null)
+            return Results.Content("<html><body><h1>Pago aún no confirmado</h1><p>Vuelve a la aplicación. La licencia se activa únicamente cuando PayPal confirma el cobro.</p></body></html>", "text/html; charset=utf-8", statusCode: StatusCodes.Status202Accepted);
+        var resultado = await store.ProcesarPagoAsync(pago, cancellationToken);
+        if (resultado is ResultadoProcesamientoPago.Activado or ResultadoProcesamientoPago.YaProcesado)
+            return Results.Content("<html><body><h1>Pago confirmado</h1><p>La licencia quedó activada. Puedes volver a PonceanoFacturador.</p></body></html>", "text/html; charset=utf-8");
+        logger.LogError("PayPal retornó una captura que no coincide con una orden registrada. Resultado={Resultado}; Orden={Orden}; Captura={Captura}", resultado, pago.IdOrden, pago.IdCaptura);
+        return Results.Content("<html><body><h1>Pago recibido para revisión</h1><p>No se activó automáticamente. Contacta al administrador con tu comprobante.</p></body></html>", "text/html; charset=utf-8", statusCode: StatusCodes.Status202Accepted);
+    }
+    catch (PayPalUnavailableException)
+    {
+        return Results.Content("<html><body><h1>Verificación temporalmente no disponible</h1><p>Vuelve a la aplicación y consulta tu licencia más tarde.</p></body></html>", "text/html; charset=utf-8", statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+}).RequireRateLimiting("webhook");
+
+app.MapGet("/api/pago/cancelado", () => Results.Content("<html><body><h1>Pago cancelado</h1><p>No se realizó ningún cambio en la licencia. Puedes volver a PonceanoFacturador.</p></body></html>", "text/html; charset=utf-8"));
+
+app.MapPost("/api/pago/webhook", async (HttpRequest request, PayPalVerifier verifier, PayPalPaymentsClient paypal, IServiceProvider services, ILogger<Program> logger, CancellationToken cancellationToken) =>
 {
     if (!request.HasJsonContentType())
         return Results.StatusCode(StatusCodes.Status415UnsupportedMediaType);
@@ -126,17 +181,48 @@ app.MapPost("/api/pago/webhook", async (HttpRequest request, PayPalVerifier veri
     catch (JsonException) { return Results.BadRequest(new { error = "El evento JSON no es válido." }); }
     using (document)
     {
-        if (document.RootElement.ValueKind != JsonValueKind.Object ||
-            !document.RootElement.TryGetProperty("id", out var id) || id.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(id.GetString()) ||
-            !document.RootElement.TryGetProperty("event_type", out var type) || type.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(type.GetString()))
+        var root = document.RootElement;
+        if (root.ValueKind != JsonValueKind.Object ||
+            !root.TryGetProperty("id", out var id) || id.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(id.GetString()) ||
+            !root.TryGetProperty("event_type", out var type) || type.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(type.GetString()))
             return Results.BadRequest(new { error = "El evento debe incluir id y event_type." });
-        var result = await verifier.VerificarAsync(request.Headers, document.RootElement, cancellationToken);
+        var result = await verifier.VerificarAsync(request.Headers, root, cancellationToken);
         if (result == ResultadoFirma.Invalida) return Results.Unauthorized();
         if (result == ResultadoFirma.NoDisponible)
             return Results.Problem("No se pudo verificar la firma de PayPal.", statusCode: 503);
-        logger.LogWarning("Evento PayPal verificado; el procesamiento de pagos aún no está configurado.");
-        // No confirmar el evento hasta implementar persistencia, idempotencia y conciliación del pago.
-        return Results.Problem("Firma verificada, pero el procesamiento de pagos aún no está configurado.", statusCode: 503);
+        if (type.GetString() != "PAYMENT.CAPTURE.COMPLETED")
+            return Results.Ok(new { estado = "Evento autenticado no aplicable." });
+        if (!root.TryGetProperty("resource", out var resource) || resource.ValueKind != JsonValueKind.Object ||
+            resource.GetPropertyOrDefault("status") != "COMPLETED" ||
+            resource.GetPropertyOrDefault("id") is not { Length: > 0 } captureId ||
+            !resource.TryGetProperty("supplementary_data", out var supplementary) || supplementary.ValueKind != JsonValueKind.Object ||
+            !supplementary.TryGetProperty("related_ids", out var related) || related.ValueKind != JsonValueKind.Object ||
+            related.GetPropertyOrDefault("order_id") is not { Length: > 0 } orderId ||
+            !resource.TryGetProperty("amount", out var amount) ||
+            !decimal.TryParse(amount.GetPropertyOrDefault("value"), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var eventAmount) ||
+            amount.GetPropertyOrDefault("currency_code") != "USD")
+            return Results.BadRequest(new { error = "El evento de captura no tiene los datos esperados." });
+        var store = services.GetService<IPayPalPaymentStore>();
+        if (store is null)
+            return Results.Problem("El almacenamiento PostgreSQL de pagos no está disponible.", statusCode: 503);
+        try
+        {
+            var pago = await paypal.CapturarYVerificarOrdenAsync(orderId, captureId, capturar: false, cancellationToken);
+            if (pago is null || pago.ImporteUsd != eventAmount || pago.Moneda != "USD")
+            {
+                logger.LogError("La captura de PayPal no coincide con la orden completada. Orden={Orden}; Captura={Captura}", orderId, captureId);
+                return Results.Ok(new { estado = "Pago recibido para revisión; no se activó la licencia." });
+            }
+            pago = pago with { IdEvento = id.GetString() };
+            var procesado = await store.ProcesarPagoAsync(pago, cancellationToken);
+            if (procesado is ResultadoProcesamientoPago.OrdenDesconocida or ResultadoProcesamientoPago.DatosNoCoinciden)
+                logger.LogError("Evento PayPal autenticado no conciliado. Resultado={Resultado}; Orden={Orden}; Captura={Captura}", procesado, orderId, captureId);
+            return Results.Ok(new { estado = procesado.ToString() });
+        }
+        catch (PayPalUnavailableException)
+        {
+            return Results.Problem("No se pudo consultar la captura en PayPal.", statusCode: 503);
+        }
     }
 }).RequireRateLimiting("webhook");
 

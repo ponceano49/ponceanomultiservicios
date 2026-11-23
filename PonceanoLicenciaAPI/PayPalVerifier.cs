@@ -15,8 +15,9 @@ public sealed class PayPalVerifier(HttpClient client, IConfiguration config, ILo
         var clientId = config["PayPal:ClientId"];
         var secret = config["PayPal:ClientSecret"];
         var webhookId = config["PayPal:WebhookId"];
-        if (environment is not ("Sandbox" or "Live") || string.IsNullOrWhiteSpace(clientId) ||
-            string.IsNullOrWhiteSpace(secret) || string.IsNullOrWhiteSpace(webhookId))
+        if (environment is not ("Sandbox" or "Live") ||
+            environment == "Live" && !config.GetValue<bool>("PayPal:AllowLivePayments") ||
+            string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(secret) || string.IsNullOrWhiteSpace(webhookId))
         {
             logger.LogWarning("PayPal no está configurado para verificar firmas.");
             return ResultadoFirma.NoDisponible;

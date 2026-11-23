@@ -1,9 +1,10 @@
 using System.Data;
 using Npgsql;
+using NpgsqlTypes;
 
 namespace PonceanoLicenciaAPI;
 
-public sealed class PostgresLicenciaRepository : ILicenciaRepository, IAsyncDisposable
+public sealed class PostgresLicenciaRepository : ILicenciaRepository, IPayPalPaymentStore, IAsyncDisposable
 {
     private readonly NpgsqlDataSource _dataSource;
     private const string Schema = """
@@ -13,6 +14,24 @@ public sealed class PostgresLicenciaRepository : ILicenciaRepository, IAsyncDisp
             estadolicencia text NOT NULL CHECK (estadolicencia IN ('Activo', 'Pendiente', 'Vencido')),
             fechavencimiento timestamp with time zone NOT NULL,
             codigotransaccionpago text NOT NULL UNIQUE
+        );
+        CREATE TABLE IF NOT EXISTS pagos_paypal_ordenes (
+            paypal_order_id text PRIMARY KEY,
+            referencia text NOT NULL UNIQUE,
+            correousuario text NOT NULL,
+            plan text NOT NULL CHECK (plan IN ('mensual', 'anual')),
+            importe numeric(10,2) NOT NULL,
+            moneda char(3) NOT NULL CHECK (moneda = 'USD'),
+            estado text NOT NULL CHECK (estado IN ('Pendiente', 'Completada')),
+            fechacreacion timestamp with time zone NOT NULL DEFAULT now(),
+            idcaptura text UNIQUE
+        );
+        CREATE TABLE IF NOT EXISTS pagos_paypal_eventos (
+            event_id text UNIQUE,
+            capture_id text PRIMARY KEY,
+            paypal_order_id text NOT NULL,
+            referencia text NOT NULL,
+            fechaprocesamiento timestamp with time zone NOT NULL DEFAULT now()
         );
         """;
 
@@ -123,6 +142,137 @@ public sealed class PostgresLicenciaRepository : ILicenciaRepository, IAsyncDisp
         {
             await transaction.RollbackAsync(CancellationToken.None);
             throw new TransaccionDuplicadaException();
+        }
+        catch
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+    }
+
+    public async Task RegistrarOrdenAsync(string idOrden, string referencia, string correo, PlanPago plan, CancellationToken cancellationToken)
+    {
+        const string sql = "INSERT INTO pagos_paypal_ordenes (paypal_order_id, referencia, correousuario, plan, importe, moneda, estado) VALUES (@orden, @referencia, @correo, @plan, @importe, 'USD', 'Pendiente')";
+        await using var command = _dataSource.CreateCommand(sql);
+        command.Parameters.AddWithValue("orden", idOrden);
+        command.Parameters.AddWithValue("referencia", referencia);
+        command.Parameters.AddWithValue("correo", correo);
+        command.Parameters.AddWithValue("plan", plan.Codigo);
+        command.Parameters.AddWithValue("importe", plan.ImporteUsd);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task<OrdenPayPal?> BuscarOrdenAsync(string idOrden, CancellationToken cancellationToken)
+    {
+        const string sql = "SELECT referencia, correousuario, plan, estado FROM pagos_paypal_ordenes WHERE paypal_order_id = @orden";
+        await using var command = _dataSource.CreateCommand(sql);
+        command.Parameters.AddWithValue("orden", idOrden);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken) || !PlanPago.TryObtener(reader.GetString(2), out var plan))
+            return null;
+        return new OrdenPayPal(idOrden, reader.GetString(0), reader.GetString(1), plan, reader.GetString(3));
+    }
+
+    public async Task<ResultadoProcesamientoPago> ProcesarPagoAsync(PagoPayPalVerificado pago, CancellationToken cancellationToken)
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+        try
+        {
+            const string buscarOrden = "SELECT referencia, correousuario, plan, importe, moneda, estado FROM pagos_paypal_ordenes WHERE paypal_order_id = @orden FOR UPDATE";
+            string referencia;
+            string correo;
+            PlanPago plan;
+            decimal importe;
+            string moneda;
+            string estado;
+            await using (var command = new NpgsqlCommand(buscarOrden, connection, transaction))
+            {
+                command.Parameters.AddWithValue("orden", pago.IdOrden);
+                await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                if (!await reader.ReadAsync(cancellationToken))
+                {
+                    await reader.CloseAsync();
+                    await transaction.RollbackAsync(CancellationToken.None);
+                    return ResultadoProcesamientoPago.OrdenDesconocida;
+                }
+                referencia = reader.GetString(0);
+                correo = reader.GetString(1);
+                if (!PlanPago.TryObtener(reader.GetString(2), out plan!))
+                    throw new InvalidOperationException("El plan de una orden PayPal guardada no es válido.");
+                importe = reader.GetDecimal(3);
+                moneda = reader.GetString(4).Trim();
+                estado = reader.GetString(5);
+            }
+
+            if (!string.Equals(referencia, pago.Referencia, StringComparison.Ordinal) ||
+                pago.ImporteUsd != importe || !string.Equals(pago.Moneda, moneda, StringComparison.Ordinal) || moneda != "USD")
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+                return ResultadoProcesamientoPago.DatosNoCoinciden;
+            }
+
+            const string buscarPago = "SELECT paypal_order_id, referencia FROM pagos_paypal_eventos WHERE capture_id = @captura OR (@evento IS NOT NULL AND event_id = @evento) FOR UPDATE";
+            await using (var command = new NpgsqlCommand(buscarPago, connection, transaction))
+            {
+                command.Parameters.AddWithValue("captura", pago.IdCaptura);
+                command.Parameters.Add("evento", NpgsqlDbType.Text).Value = (object?)pago.IdEvento ?? DBNull.Value;
+                await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                if (await reader.ReadAsync(cancellationToken))
+                {
+                    var duplicado = reader.GetString(0) == pago.IdOrden && reader.GetString(1) == pago.Referencia;
+                    await reader.CloseAsync();
+                    await transaction.CommitAsync(cancellationToken);
+                    return duplicado ? ResultadoProcesamientoPago.YaProcesado : ResultadoProcesamientoPago.DatosNoCoinciden;
+                }
+            }
+
+            if (estado != "Pendiente")
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+                return ResultadoProcesamientoPago.DatosNoCoinciden;
+            }
+
+            var ahora = DateTimeOffset.UtcNow;
+            const string activar = """
+                INSERT INTO licencias (correousuario, estadolicencia, fechavencimiento, codigotransaccionpago)
+                VALUES (@correo, 'Activo', @ahora + @duracion, @captura)
+                ON CONFLICT (correousuario) DO UPDATE SET
+                    estadolicencia = 'Activo',
+                    fechavencimiento = GREATEST(licencias.fechavencimiento, @ahora) + @duracion,
+                    codigotransaccionpago = EXCLUDED.codigotransaccionpago
+                """;
+            await using (var command = new NpgsqlCommand(activar, connection, transaction))
+            {
+                command.Parameters.AddWithValue("correo", correo);
+                command.Parameters.AddWithValue("ahora", ahora);
+                command.Parameters.AddWithValue("duracion", TimeSpan.FromDays(plan.Dias));
+                command.Parameters.AddWithValue("captura", pago.IdCaptura);
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }
+
+            const string registrar = "INSERT INTO pagos_paypal_eventos (event_id, capture_id, paypal_order_id, referencia) VALUES (@evento, @captura, @orden, @referencia)";
+            await using (var command = new NpgsqlCommand(registrar, connection, transaction))
+            {
+                command.Parameters.Add("evento", NpgsqlDbType.Text).Value = (object?)pago.IdEvento ?? DBNull.Value;
+                command.Parameters.AddWithValue("captura", pago.IdCaptura);
+                command.Parameters.AddWithValue("orden", pago.IdOrden);
+                command.Parameters.AddWithValue("referencia", pago.Referencia);
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }
+            await using (var command = new NpgsqlCommand("UPDATE pagos_paypal_ordenes SET estado = 'Completada', idcaptura = @captura WHERE paypal_order_id = @orden", connection, transaction))
+            {
+                command.Parameters.AddWithValue("captura", pago.IdCaptura);
+                command.Parameters.AddWithValue("orden", pago.IdOrden);
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }
+            await transaction.CommitAsync(cancellationToken);
+            return ResultadoProcesamientoPago.Activado;
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            return ResultadoProcesamientoPago.DatosNoCoinciden;
         }
         catch
         {
