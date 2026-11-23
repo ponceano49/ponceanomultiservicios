@@ -6,6 +6,8 @@ API independiente ASP.NET Core (.NET 10) para gestionar licencias de PonceanoFac
 
 La API requiere PostgreSQL y valida Firebase ID tokens. En Railway configure `DATABASE_URL` (o `ConnectionStrings__Licencias`), `Firebase__ProjectId`, `AdminEmail` y un `AdminKey` aleatorio con al menos 32 bytes. No incluya secretos en Git ni en el APK. El arranque abre la base PostgreSQL, exige TLS con verificación del certificado y crea la tabla `licencias` si no existe; la API no inicia si falta la conexión o la base no está accesible. Confirme `/health/ready` y luego pruebe el endpoint protegido con un Firebase ID token válido antes de desplegar clientes.
 
+El certificado `railway-postgres-root.crt` es la CA pública del servicio PostgreSQL de Railway y el Dockerfile la instala en el almacén de confianza para conservar `SslMode=VerifyFull`. Si Railway renueva o reemplaza la CA de PostgreSQL, actualice ese archivo con la nueva CA y redespliegue la API; no cambie a TLS sin validación del certificado.
+
 En Development, solo si `Storage__EnableInMemory=true`, puede usarse el repositorio de memoria local. Se borra al reiniciar y no debe habilitarse en Railway.
 
 El endpoint de administración exige un ID token Firebase válido, correo verificado coincidente con `AdminEmail` y `X-Admin-Key`. El endpoint de consulta también requiere un token Firebase válido con correo verificado; solo devuelve la licencia del correo del token, nunca de un correo arbitrario. La Web API key Firebase de la aplicación es un identificador público, no una credencial para validar tokens.
