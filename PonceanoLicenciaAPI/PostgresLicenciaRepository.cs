@@ -16,11 +16,23 @@ public sealed class PostgresLicenciaRepository : ILicenciaRepository, IAsyncDisp
         );
         """;
 
-    public PostgresLicenciaRepository(IConfiguration configuration)
+    public PostgresLicenciaRepository(IConfiguration configuration, ILogger<PostgresLicenciaRepository> logger)
     {
-        var connectionString = configuration.GetConnectionString("Licencias") ?? configuration["DATABASE_URL"];
+        var connectionString = configuration.GetConnectionString("Licencias");
         if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("Configure ConnectionStrings__Licencias o DATABASE_URL de PostgreSQL en el entorno del servidor.");
+        {
+            if (connectionString is not null)
+                logger.LogWarning("ConnectionStrings__Licencias está vacía; se intentará usar DATABASE_URL.");
+            connectionString = configuration["DATABASE_URL"];
+        }
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            const string mensaje = "Configure ConnectionStrings__Licencias o DATABASE_URL de PostgreSQL con un valor no vacío en el servicio y entorno de Railway correctos.";
+            logger.LogError("{Mensaje}", mensaje);
+            throw new InvalidOperationException(mensaje);
+        }
+
         _dataSource = NpgsqlDataSource.Create(NormalizarCadenaConexion(connectionString));
     }
 
