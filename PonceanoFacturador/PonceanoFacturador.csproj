@@ -75,6 +75,8 @@
 
 	<ItemGroup>
 	  <None Update="tessdata\spa.traineddata" Link="tessdata\spa.traineddata" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <None Update="INSTALAR_ACCESOS.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <None Update="LEEME_INSTALAR_ACCESOS.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
 	<ItemGroup>

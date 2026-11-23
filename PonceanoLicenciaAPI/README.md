@@ -32,7 +32,7 @@ No habilite esta opción fuera de desarrollo. Para ensayar PostgreSQL localmente
 
 ### Contratos
 
-- `GET /api/licencia/verificar?correo=cliente%40ejemplo.com` exige `Authorization: Bearer <Firebase ID token>` con audiencia/emisor del proyecto configurado y correo verificado. El parámetro correo es opcional; si se proporciona debe coincidir con el correo autenticado. Devuelve `EstadoLicencia` (`Activo`, `Pendiente`, `Vencido`) y `FechaVencimiento` (ISO 8601 UTC o `null`).
+- `GET /api/licencia/verificar?correo=cliente%40ejemplo.com` exige `Authorization: Bearer <Firebase ID token>` con audiencia/emisor del proyecto configurado y correo verificado. El parámetro correo es opcional; si se proporciona debe coincidir con el correo autenticado. Devuelve `estadoLicencia` (`Activo`, `Pendiente`, `Vencido`) y `fechaVencimiento` (ISO 8601 UTC o `null`).
 - `POST /api/licencia/activar-manual` exige también un ID token Firebase del administrador configurado en `AdminEmail` y `X-Admin-Key`. JSON: `correoUsuario`, `fechaVencimiento` (fecha y hora ISO 8601 con zona horaria explícita, futura) y `codigoTransaccionPago` (1–128 caracteres). Una repetición idéntica es idempotente; reutilizar el código con otros datos devuelve 409.
 - `POST /api/pago/orden`: exige ID token Firebase con correo verificado. JSON: `{"plan":"mensual"}` o `{"plan":"anual"}`. Devuelve `ordenId`, precio fijado por el servidor y `urlAprobacion` de PayPal Sandbox. No acepta correo, importe, moneda ni duración del cliente.
 - `GET /api/pago/retorno?token={ordenId}`: callback de PayPal tras la aprobación. Captura y consulta la orden con PayPal; activa únicamente si la captura está completada y coincide con la orden persistida.

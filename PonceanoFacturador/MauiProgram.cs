@@ -41,6 +41,10 @@ namespace PonceanoFacturador
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<LicenciaService>();
             builder.Services.AddSingleton(_ => new LicenciaRemotaService(new HttpClient(new HttpClientHandler { AllowAutoRedirect = false, UseProxy = false }) { Timeout = TimeSpan.FromSeconds(8) }));
+            builder.Services.AddSingleton<PayPalCheckoutService>(services => new PayPalCheckoutService(
+                new HttpClient(new HttpClientHandler { AllowAutoRedirect = false, UseProxy = false }) { Timeout = TimeSpan.FromSeconds(20) },
+                services.GetRequiredService<AuthService>(), services.GetRequiredService<LicenciaRemotaService>(),
+                services.GetRequiredService<DatabaseService>()));
             builder.Services.AddSingleton<RelojNtpService>();
             builder.Services.AddSingleton<IRelojNtpService>(services => services.GetRequiredService<RelojNtpService>());
             builder.Services.AddSingleton<IdentificadorDispositivoService>();

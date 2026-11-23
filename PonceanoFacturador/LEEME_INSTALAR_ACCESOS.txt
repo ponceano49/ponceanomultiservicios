@@ -1,0 +1,14 @@
+INSTRUCCIONES PARA CREAR EL ACCESO DIRECTO DE PONCEANO FACTURADOR
+
+1. Descomprime el ZIP completo en una carpeta. No ejecutes el programa desde dentro del ZIP.
+2. En la carpeta descomprimida, haz doble clic en INSTALAR_ACCESOS.bat.
+   No es necesario ejecutarlo como administrador: el acceso se crea en tu Escritorio.
+3. Confirma que aparezca el acceso directo "Ponceano Facturador" en el Escritorio y ábrelo.
+
+FIJAR A LA BARRA DE TAREAS
+La fijación a la barra de tareas no se realiza automáticamente.
+1. Abre Ponceano Facturador desde el acceso directo del Escritorio.
+2. Haz clic derecho en el icono del programa que aparece en la barra de tareas.
+3. Selecciona "Fijar a la barra de tareas".
+
+Conserva la carpeta descomprimida: el acceso directo apunta al ejecutable que está dentro de ella.

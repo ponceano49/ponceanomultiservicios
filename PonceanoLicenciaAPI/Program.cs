@@ -16,7 +16,6 @@ if (!string.IsNullOrWhiteSpace(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
 }
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 64 * 1024);
-builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.PropertyNamingPolicy = null);
 if (builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("Storage:EnableInMemory"))
     builder.Services.AddSingleton<ILicenciaRepository, LicenciaRepositoryMemoria>();
 else
