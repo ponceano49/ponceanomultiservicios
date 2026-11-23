@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -95,7 +96,8 @@ public sealed class PayPalPaymentsClient(HttpClient client, IConfiguration confi
         {
             using var captureRequest = new HttpRequestMessage(HttpMethod.Post, $"https://{host}/v2/checkout/orders/{Uri.EscapeDataString(idOrden)}/capture");
             captureRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            captureRequest.Headers.Add("PayPal-Request-Id", $"capture-{idOrden}");
+            var requestId = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(idOrden)))[..32];
+            captureRequest.Headers.Add("PayPal-Request-Id", requestId);
             captureRequest.Content = JsonContent.Create(new { });
             using var captureResponse = await client.SendAsync(captureRequest, cancellationToken);
             if (!captureResponse.IsSuccessStatusCode)

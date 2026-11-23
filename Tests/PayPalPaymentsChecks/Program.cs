@@ -33,6 +33,9 @@ var verified = await paypal.CapturarYVerificarOrdenAsync("ORDER12345678", "CAPTU
 Check(verified is { IdOrden: "ORDER12345678", IdCaptura: "CAPTURE123456", Referencia: "reference-123", IdComerciante: "merchant-123", ImporteUsd: 35m, Moneda: "USD" }, "orden completada conciliada con comercio, referencia e importe");
 Check(handler.Requests.Any(request => request.Method == HttpMethod.Get && request.RequestUri!.AbsolutePath.EndsWith("/v2/checkout/orders/ORDER12345678", StringComparison.Ordinal)), "consulta autoritativa de orden para webhook");
 Check(handler.Requests.All(request => request.Method != HttpMethod.Post || !request.RequestUri!.AbsolutePath.EndsWith("/capture", StringComparison.Ordinal)), "webhook no vuelve a capturar el pago");
+var captured = await paypal.CapturarYVerificarOrdenAsync("ORDER12345678", null, capturar: true, CancellationToken.None);
+var captureRequest = handler.Requests.Single(request => request.Method == HttpMethod.Post && request.RequestUri!.AbsolutePath.EndsWith("/capture", StringComparison.Ordinal));
+Check(captured is not null && captureRequest.Headers.GetValues("PayPal-Request-Id").Single().Length == 32, "retorno captura y reintenta con clave idempotente válida");
 
 var liveConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
 {
