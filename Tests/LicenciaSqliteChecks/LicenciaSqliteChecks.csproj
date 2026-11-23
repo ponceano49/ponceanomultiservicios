@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net11.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup>
+	<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
+	<Compile Include="..\..\PonceanoFacturador\Services\DatabaseService.cs" Link="DatabaseService.cs" />
+	<Compile Include="..\..\PonceanoFacturador\Models\*.cs" Link="Models\%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

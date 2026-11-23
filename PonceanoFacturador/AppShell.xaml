@@ -1,0 +1,11 @@
+<Shell
+    x:Class="PonceanoFacturador.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Ponceano Facturador"
+    FlyoutBehavior="Locked"
+    FlyoutWidth="160"
+    FlyoutBackgroundColor="#F4F4F4"
+    ForegroundColor="#60788F"
+    BackgroundColor="#FFFFFF">
+</Shell>

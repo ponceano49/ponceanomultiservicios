@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:PonceanoFacturador.Models"
+             x:Class="PonceanoFacturador.Views.ResumenPage" Title="Resumen y reportes" Shell.NavBarIsVisible="False" BackgroundColor="White">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="14">
+            <Label Text="▥ Resumen" FontSize="24" TextColor="#737373" />
+            <FlexLayout Wrap="Wrap" JustifyContent="SpaceBetween" AlignItems="Center">
+                <HorizontalStackLayout Spacing="2">
+                    <Button x:Name="ResumenFacturaButton" Text="Factura" Clicked="OnResumenFacturaClicked" />
+                    <Button x:Name="ResumenCotizacionButton" Text="Cotización" Clicked="OnResumenCotizacionClicked" />
+                    <Button x:Name="ResumenNotaButton" Text="Nota de crédito" Clicked="OnResumenNotaClicked" />
+                    <Button x:Name="ResumenPagadoButton" Text="Pagado" Clicked="OnResumenPagadoClicked" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                    <Label Text="Desde" VerticalOptions="Center" TextColor="#777777" />
+                    <DatePicker x:Name="ResumenDesdePicker" DateSelected="OnResumenFechaChanged" Format="dd/MM/yyyy" />
+                    <Label Text="Hasta" VerticalOptions="Center" TextColor="#777777" />
+                    <DatePicker x:Name="ResumenHastaPicker" DateSelected="OnResumenFechaChanged" Format="dd/MM/yyyy" />
+                </HorizontalStackLayout>
+            </FlexLayout>
+            <Border Stroke="#DCE1E6" StrokeThickness="1" Padding="14">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto"><Label Text="Resumen mensual" FontSize="18" TextColor="#777777" /><Label x:Name="ResumenTotalLabel" Grid.Column="1" TextColor="#777777" FontSize="18" /></Grid>
+                    <Label x:Name="ResumenEstadoLabel" TextColor="#C0392B" FontSize="12" />
+                    <Label x:Name="ResumenPagadoInfoLabel" Text="Pagado refleja el estado registrado manualmente, no una confirmación bancaria." TextColor="#805500" FontSize="11" IsVisible="False" />
+                    <GraphicsView x:Name="ResumenGrafico" HeightRequest="260" />
+                    <Grid ColumnDefinitions="*,*,Auto" Padding="8,6" BackgroundColor="#FAFAFA"><Label Text="Fecha" FontAttributes="Bold" TextColor="#777777" HorizontalTextAlignment="Center" /><Label Grid.Column="1" Text="Importe" FontAttributes="Bold" TextColor="#777777" HorizontalTextAlignment="End" /><Label Grid.Column="2" Text="Detalle" FontAttributes="Bold" TextColor="#777777" Margin="16,0,0,0" /></Grid>
+                    <VerticalStackLayout x:Name="ResumenMesesLayout" Spacing="0" />
+                </VerticalStackLayout>
+            </Border>
+            <Label Text="Panel y reportes" FontSize="20" FontAttributes="Bold" />
+            <Label x:Name="BienvenidaLabel" FontSize="26" FontAttributes="Bold" />
+            <Label Text="Resumen de hoy" FontSize="20" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowSpacing="10">
+                <Border Padding="14"><VerticalStackLayout><Label Text="🧾 Facturas hoy"/><Label x:Name="FacturasHoyLabel" FontSize="20" FontAttributes="Bold"/></VerticalStackLayout></Border>
+                <Border Grid.Column="1" Padding="14"><VerticalStackLayout><Label Text="💰 Total del día"/><Label x:Name="TotalDiaLabel" FontSize="20" FontAttributes="Bold"/></VerticalStackLayout></Border>
+            </Grid>
+            <Label Text="Resumen mensual" FontSize="20" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowSpacing="10">
+                <Border Padding="14"><VerticalStackLayout><Label Text="💵 Total mensual"/><Label x:Name="VentasLabel" FontSize="20" FontAttributes="Bold"/></VerticalStackLayout></Border>
+                <Border Grid.Column="1" Padding="14"><VerticalStackLayout><Label Text="📈 ITBIS"/><Label x:Name="ItbisLabel" FontSize="20" FontAttributes="Bold"/></VerticalStackLayout></Border>
+            </Grid>
+            <Border Padding="14"><Grid ColumnDefinitions="*,Auto"><VerticalStackLayout><Label x:Name="LicenciaLabel" FontAttributes="Bold"/><Label x:Name="VenceLabel"/><Label x:Name="DiasPruebaLabel" IsVisible="False" FontAttributes="Bold" TextColor="#9A5A00"/></VerticalStackLayout><Button Grid.Column="1" Text="Ver plan" Clicked="OnLicenciaClicked"/></Grid></Border>
+            <Label Text="Acciones rápidas" FontSize="20" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8" RowSpacing="8">
+                <Button Text="Nueva Factura" Clicked="OnNuevaFacturaClicked" />
+                <Button Grid.Column="1" Text="Nuevo Cliente" Clicked="OnNuevoClienteClicked" />
+                <Button Grid.Row="1" Text="Nueva Cotización" Clicked="OnNuevaCotizacionClicked" />
+                <Button Grid.Row="1" Grid.Column="1" Text="Exportar CSV" Clicked="OnExportarDatosClicked" />
+            </Grid>
+            <Label Text="Reportes" FontSize="20" FontAttributes="Bold" />
+            <HorizontalStackLayout Spacing="8"><Button x:Name="VentasTabButton" Text="Reporte de Ventas" Clicked="OnVentasTabClicked"/><Button x:Name="ClientesTabButton" Text="Reporte de Clientes" Clicked="OnClientesTabClicked"/></HorizontalStackLayout>
+            <VerticalStackLayout x:Name="VentasReporte" Spacing="8">
+                <Picker x:Name="PeriodoPicker" Title="Período" SelectedIndexChanged="OnPeriodoChanged" />
+                <Grid ColumnDefinitions="Auto,*"><Label Text="Desde:" VerticalOptions="Center"/><DatePicker x:Name="DesdePicker" Grid.Column="1" /></Grid>
+                <Grid ColumnDefinitions="Auto,*"><Label Text="Hasta:" VerticalOptions="Center"/><DatePicker x:Name="HastaPicker" Grid.Column="1" /></Grid>
+                <Button Text="Generar Reporte" Clicked="OnGenerarVentasClicked" />
+                <Label x:Name="VentasVacioLabel" Text="No hay registros en el período seleccionado" IsVisible="False" />
+                <CollectionView x:Name="VentasLista" HeightRequest="260">
+                    <CollectionView.ItemTemplate><DataTemplate><Border Padding="8" Margin="0,2"><Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto"><Label Text="{Binding FechaTexto}"/><Label Grid.Column="1" Text="{Binding Documento}"/><Label Grid.Column="2" Text="{Binding TotalTexto}"/><Label Grid.Row="1" Text="{Binding Cliente}"/><Label Grid.Row="1" Grid.Column="1" Text="{Binding SubtotalTexto}"/><Label Grid.Row="1" Grid.Column="2" Text="{Binding ItbisTexto}"/></Grid></Border></DataTemplate></CollectionView.ItemTemplate>
+                </CollectionView>
+                <Label x:Name="TotalesVentasLabel" FontAttributes="Bold" />
+                <HorizontalStackLayout Spacing="8"><Button Text="Exportar PDF" Clicked="OnExportarPdfClicked"/><Button Text="Exportar Excel/CSV" Clicked="OnExportarCsvClicked"/></HorizontalStackLayout>
+            </VerticalStackLayout>
+            <VerticalStackLayout x:Name="ClientesReporte" IsVisible="False" Spacing="8">
+                <Picker x:Name="OrdenClientesPicker" Title="Ordenar por" SelectedIndexChanged="OnOrdenClientesChanged" />
+                <Label x:Name="ClientesVacioLabel" Text="No hay compras de clientes en el período seleccionado" IsVisible="False" />
+                <CollectionView x:Name="ClientesLista" HeightRequest="300">
+                    <CollectionView.ItemTemplate><DataTemplate><Border Padding="8" Margin="0,2"><Grid ColumnDefinitions="*,Auto,Auto"><Label Text="{Binding Nombre}" FontAttributes="Bold"/><Label Grid.Column="1" Text="{Binding Compras, StringFormat='{0} compras'}" Margin="8,0"/><Label Grid.Column="2" Text="{Binding TotalTexto}"/></Grid></Border></DataTemplate></CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+            <Label Text="✅ Ponceano Facturador — Versión Completa\nMódulos: Autenticación · Clientes · Artículos · Cotizaciones · Facturas · Notas de Crédito · Reportes · Ajustes · Licencias\n¡Listo para usar!" HorizontalTextAlignment="Center" FontSize="12" />
+            <Label x:Name="MensajeLabel" TextColor="#C0392B" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

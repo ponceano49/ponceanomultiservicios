@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PonceanoFacturador.Views.AjustesPage"
+             Title="Ajustes"
+             BackgroundColor="#F7F8FA">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="14">
+            <Label Text="☷ Ajustes" FontSize="28" TextColor="#777777" />
+            <Border Stroke="#D9DEE5" StrokeThickness="1" BackgroundColor="White" Padding="16">
+                <VerticalStackLayout Spacing="0">
+                    <Label Text="Servidor de licencias (preparación)" FontSize="18" FontAttributes="Bold" TextColor="#777777" />
+                    <Label Text="Esta dirección se guarda en el dispositivo y no cambia la validación remota, que utiliza el servidor seguro de Railway. No introduzcas claves ni contraseñas." FontSize="12" TextColor="#805500" />
+                    <Entry x:Name="ServidorLicenciaEntry" Placeholder="https://dominio-del-servidor" Keyboard="Url" />
+                    <Button Text="Guardar dirección del servidor" Clicked="OnGuardarServidorLicenciaClicked" HorizontalOptions="Start" />
+                    <Label x:Name="ServidorLicenciaMensajeLabel" FontSize="12" />
+                    <Label Text="Nombre de usuario" FontSize="13" TextColor="#888888" />
+                    <Entry x:Name="UsuarioEntry" IsReadOnly="True" IsEnabled="False" BackgroundColor="Transparent" />
+                    <Label Text="Compañía" FontSize="18" FontAttributes="Bold" TextColor="#777777" Margin="0,18,0,8" />
+                    <Entry x:Name="CompaniaEntry" Placeholder="Nombre de la empresa *" />
+                    <Entry x:Name="RncEntry" Placeholder="RNC de la compañía" Keyboard="Numeric" />
+                    <Entry x:Name="CorreoEntry" Placeholder="Correo para la factura" Keyboard="Email" />
+                    <Entry x:Name="TelefonosEntry" Placeholder="Teléfonos" />
+                    <Entry x:Name="Direccion1Entry" Placeholder="Dirección" />
+                    <Entry x:Name="Direccion2Entry" Placeholder="Información adicional" />
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                        <Label Text="Logo de la compañía" VerticalOptions="Center" TextColor="#777777" />
+                        <Button Grid.Column="1" Text="Seleccionar logo" Clicked="OnLogoClicked" />
+                    </Grid>
+                    <Image x:Name="LogoPreview" HeightRequest="90" Aspect="AspectFit" IsVisible="False" HorizontalOptions="Start" />
+                    <BoxView HeightRequest="1" Color="#DDDDDD" Margin="0,8" />
+                    <Editor x:Name="PagoEditor" Placeholder="Instrucción de pago" AutoSize="TextChanges" />
+                    <Picker x:Name="PagoPicker" Title="Opción de pago" />
+                    <Label Text="Métodos de pago aceptados" FontAttributes="Bold" TextColor="#777777" Margin="0,8,0,4" />
+                    <HorizontalStackLayout><CheckBox x:Name="EfectivoCheck"/><Label Text="Efectivo" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <HorizontalStackLayout><CheckBox x:Name="TransferenciaCheck"/><Label Text="Transferencia bancaria" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <HorizontalStackLayout><CheckBox x:Name="ChequeCheck"/><Label Text="Cheque" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <HorizontalStackLayout><CheckBox x:Name="TarjetaCheck"/><Label Text="Tarjeta de crédito/débito" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <HorizontalStackLayout><CheckBox x:Name="CreditoCheck"/><Label Text="Crédito (pago a plazos)" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <HorizontalStackLayout><CheckBox x:Name="OtroCheck"/><Label Text="Otro" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <Entry x:Name="OtroMetodoEntry" Placeholder="Describe otro método" />
+                    <Label Text="Datos bancarios para transferencias" FontAttributes="Bold" TextColor="#777777" Margin="0,8,0,4" />
+                    <Entry x:Name="BancoEntry" Placeholder="Nombre del banco" />
+                    <Entry x:Name="NumeroCuentaEntry" Placeholder="Número de cuenta" />
+                    <Picker x:Name="TipoCuentaPicker" Title="Tipo de cuenta" />
+                    <Entry x:Name="BancoRncEntry" Placeholder="RNC de la cuenta" />
+                    <Entry x:Name="ReferenciaEntry" Placeholder="Mensaje de referencia" />
+                    <HorizontalStackLayout><CheckBox x:Name="RecargoCheck"/><Label Text="Agregar recargo al cliente" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="8"><Label Text="Recargo (%)" VerticalOptions="Center"/><Stepper x:Name="RecargoStepper" Minimum="0" Maximum="100" Increment="0.5" ValueChanged="OnRecargoChanged"/><Label x:Name="RecargoLabel" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <Entry x:Name="MotivoRecargoEntry" Placeholder="Motivo del recargo" />
+                    <HorizontalStackLayout><CheckBox x:Name="StripeCheck" IsEnabled="False"/><Label Text="Stripe (integración pendiente)" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <Button Text="Información de Stripe" Clicked="OnStripeClicked" HorizontalOptions="Start" />
+                    <HorizontalStackLayout><CheckBox x:Name="PayPalCheck"/><Label Text="PayPal (cobros no integrados)" VerticalOptions="Center"/></HorizontalStackLayout>
+                    <Entry x:Name="PayPalCorreoEntry" Placeholder="Correo de PayPal" Keyboard="Email" />
+
+                    <Label Text="Factura" FontSize="18" FontAttributes="Bold" TextColor="#777777" Margin="0,22,0,8" />
+                    <Picker x:Name="VencePicker" Title="Vence en (días)" />
+                    <Picker x:Name="MonedaPicker" Title="Moneda" />
+                    <Entry x:Name="SimboloEntry" Placeholder="Símbolo de moneda" />
+                    <HorizontalStackLayout Spacing="10"><Label Text="Impuesto (%)" VerticalOptions="Center" /><Stepper x:Name="ImpuestoStepper" Minimum="0" Maximum="100" Increment="0.5" ValueChanged="OnImpuestoChanged" /><Label x:Name="ImpuestoLabel" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="8"><CheckBox x:Name="ImpuestoIncluidoCheck" /><Label Text="Impuesto incluido en el precio" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <Editor x:Name="NotaEditor" Placeholder="Nota por defecto" AutoSize="TextChanges" />
+                    <Editor x:Name="CorreoMensajeEditor" Placeholder="Mensaje de correo por defecto" AutoSize="TextChanges" />
+                    <Entry x:Name="CampoClienteEntry" Placeholder="Nombre del campo Cliente" />
+                    <Entry x:Name="CampoRncEntry" Placeholder="Nombre del campo RNC" />
+                    <Picker x:Name="ColorPicker" Title="Color del tema" />
+                    <Picker x:Name="CopiaFormatoPicker" Title="Enviar copia como" />
+                    <Picker x:Name="CopiaCanalPicker" Title="Enviar copia por" />
+
+                    <Label Text="Comprobantes fiscales" FontSize="18" FontAttributes="Bold" TextColor="#777777" Margin="0,22,0,6" />
+                    <Label Text="Configura únicamente secuencias autorizadas por la DGII. Estos datos se guardan localmente y no autorizan comprobantes." FontSize="12" TextColor="#A35A00" />
+                    <Grid ColumnDefinitions="1.3*,45,80,100,100" ColumnSpacing="4" Margin="0,10,0,4">
+                        <Label Text="Tipo" FontSize="11" FontAttributes="Bold" />
+                        <Label Grid.Column="1" Text="Activo" FontSize="11" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="2" Text="Prefijo" FontSize="11" FontAttributes="Bold" />
+                        <Label Grid.Column="3" Text="Siguiente" FontSize="11" FontAttributes="Bold" />
+                        <Label Grid.Column="4" Text="Final" FontSize="11" FontAttributes="Bold" />
+                    </Grid>
+                    <VerticalStackLayout x:Name="NcfRows" Spacing="4" />
+
+                    <Label Text="General" FontSize="18" FontAttributes="Bold" TextColor="#777777" Margin="0,22,0,8" />
+                    <Picker x:Name="FormatoFechaPicker" Title="Formato de fecha" />
+                    <Picker x:Name="IdiomaPicker" Title="Idioma" />
+                    <Label Text="El idioma seleccionado se guarda en tus ajustes. Los textos traducidos se activarán al completar los recursos de idioma." FontSize="12" TextColor="#777777" />
+                    <Button Text="Exportar clientes CSV" Clicked="OnExportarClicked" HorizontalOptions="Start" Margin="0,8,0,0" />
+                    <Label x:Name="SuscripcionLabel" Margin="0,10,0,0" TextColor="#777777" />
+                    <Label x:Name="MensajeLabel" TextColor="#C0392B" Margin="0,8,0,0" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,16,0,0">
+                        <Button Text="Guardar cambios" Clicked="OnGuardarClicked" />
+                        <Button Grid.Column="1" Text="Cancelar" Clicked="OnCancelarClicked" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

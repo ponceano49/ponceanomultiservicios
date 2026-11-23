@@ -1,0 +1,33 @@
+# Build outputs and IDE state
+**/bin/
+**/obj/
+**/.vs/
+*.user
+*.suo
+
+# Credentials and private signing material
+.env
+.env.*
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+*service-account*.json
+*serviceAccount*.json
+google-services.json
+GoogleService-Info.plist
+appsettings.*.json
+**/Properties/PublishProfiles/
+
+# Local artifacts and application data
+**/session-state/
+**/publish/
+*.db3
+*.sqlite
+*.sqlite3
+*.apk
+*.aab
+*.exe
+.DS_Store

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PonceanoFacturador.Views.CotizacionEditarPage" Title="Cotización"
+             Shell.NavBarIsVisible="False" BackgroundColor="White">
+    <Grid x:Name="ContenidoDocumento" IsEnabled="False" RowDefinitions="Auto,*" Padding="18,8" RowSpacing="10">
+        <FlexLayout Wrap="Wrap" JustifyContent="SpaceBetween" AlignItems="Center">
+            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                <Button Text="‹" Clicked="OnCancelarClicked" BackgroundColor="Transparent" TextColor="#65952B" FontSize="28" Padding="0" MinimumWidthRequest="32" MinimumHeightRequest="40" SemanticProperties.Description="Volver a cotizaciones" />
+                <Label Text="Cotización" FontSize="24" TextColor="#737373" VerticalOptions="Center" />
+                <Border BackgroundColor="#D0D0D0" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="8,3" VerticalOptions="Center">
+                    <Label x:Name="EstadoDocumentoLabel" Text="Nueva" TextColor="#555555" FontSize="11" />
+                </Border>
+            </HorizontalStackLayout>
+            <VerticalStackLayout x:Name="AccionesMenuLayout" Spacing="0" VerticalOptions="Start">
+                <VerticalStackLayout.GestureRecognizers>
+                    <PointerGestureRecognizer PointerEntered="OnMenuPointerEntered" PointerExited="OnMenuPointerExited" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Button Text="⋯" Clicked="OnMenuClicked" BackgroundColor="#F65A21" TextColor="White" CornerRadius="24" FontSize="22" Padding="0" WidthRequest="46" HeightRequest="46" SemanticProperties.Description="Mostrar acciones de la cotización" />
+                <Border x:Name="AccionesPopup" IsVisible="False" Stroke="#D4D4D4" StrokeShape="RoundRectangle 6" BackgroundColor="White" Padding="4" ZIndex="1">
+                    <VerticalStackLayout Spacing="2">
+                        <Button Text="Enviar por correo" Clicked="OnEnviarCorreoClicked" BackgroundColor="White" TextColor="#455A64" Padding="10,6" FontSize="12" HorizontalOptions="Fill" />
+                        <Button Text="Compartir / Guardar PDF" Clicked="OnEnviarCompartirClicked" BackgroundColor="White" TextColor="#455A64" Padding="10,6" FontSize="12" HorizontalOptions="Fill" />
+                        <Button Text="Ver PDF" Clicked="OnVerPdfMenuClicked" BackgroundColor="White" TextColor="#455A64" Padding="10,6" FontSize="12" HorizontalOptions="Fill" />
+                        <Button Text="Copiar" Clicked="OnCopiarMenuClicked" BackgroundColor="White" TextColor="#455A64" Padding="10,6" FontSize="12" HorizontalOptions="Fill" />
+                        <Button x:Name="ConvertirMenuOption" Text="Convertir a factura" Clicked="OnConvertirMenuClicked" BackgroundColor="White" TextColor="#455A64" Padding="10,6" FontSize="12" HorizontalOptions="Fill" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </FlexLayout>
+        <ScrollView Grid.Row="1">
+            <Border Stroke="#DFE4E8" StrokeThickness="1" BackgroundColor="White" Padding="0">
+                <VerticalStackLayout Spacing="0">
+                    <FlexLayout Wrap="Wrap" JustifyContent="SpaceBetween" Padding="16" AlignItems="Start">
+                        <VerticalStackLayout Spacing="3" MinimumWidthRequest="250" FlexLayout.Grow="1">
+                            <Label Text="Para" TextColor="#777777" FontAttributes="Bold" FontSize="13" />
+                            <Picker x:Name="ClientePicker" Title="Selecciona un cliente *" ItemDisplayBinding="{Binding Nombre}" HorizontalOptions="Start" WidthRequest="250" />
+                            <Label Text="Válida hasta" TextColor="#777777" FontSize="12" />
+                            <DatePicker x:Name="ValidezPicker" Format="dd/MM/yyyy" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="100,150" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="4" Padding="0,0,8,0">
+                            <Label Text="Fecha" TextColor="#777777" VerticalOptions="Center" />
+                            <Label x:Name="FechaDocumentoLabel" Grid.Column="1" TextColor="#777777" VerticalOptions="Center" />
+                            <Label Grid.Row="1" Text="Cotización" TextColor="#777777" VerticalOptions="Center" />
+                            <Label x:Name="NumeroDocumentoLabel" Grid.Row="1" Grid.Column="1" TextColor="#777777" VerticalOptions="Center" />
+                        </Grid>
+                    </FlexLayout>
+                    <ScrollView x:Name="TablaScroll" Orientation="Horizontal" HorizontalScrollBarVisibility="Default" SizeChanged="OnTablaSizeChanged">
+                        <VerticalStackLayout x:Name="TablaLayout" MinimumWidthRequest="650" HorizontalOptions="Start" Spacing="0">
+                            <Grid ColumnDefinitions="*,75,110,110,55" Padding="8,6" BackgroundColor="#FAFAFA">
+                                <Label Text="Artículo" FontAttributes="Bold" FontSize="12" TextColor="#777777" />
+                                <Label Grid.Column="1" Text="Cantidad" FontAttributes="Bold" FontSize="12" TextColor="#777777" HorizontalTextAlignment="Center" />
+                                <Label Grid.Column="2" Text="Precio" FontAttributes="Bold" FontSize="12" TextColor="#777777" HorizontalTextAlignment="Center" />
+                                <Label Grid.Column="3" Text="Importe" FontAttributes="Bold" FontSize="12" TextColor="#777777" HorizontalTextAlignment="End" />
+                                <Label Grid.Column="4" Text="Acción" FontAttributes="Bold" FontSize="12" TextColor="#777777" HorizontalTextAlignment="Center" />
+                            </Grid>
+                            <VerticalStackLayout x:Name="ItemsContainer" Spacing="0" />
+                        </VerticalStackLayout>
+                    </ScrollView>
+                    <HorizontalStackLayout x:Name="ItemsActionsLayout" Spacing="8" HorizontalOptions="Center" Margin="8,14">
+                        <Button Text="+ Agregar artículo" Clicked="OnAgregarArticuloClicked" BackgroundColor="#55B85B" TextColor="White" CornerRadius="18" Padding="12,4" MinimumHeightRequest="36" />
+                        <Button Text="+ Línea libre" Clicked="OnAgregarItemClicked" BackgroundColor="#F1F1F1" TextColor="#607080" CornerRadius="18" Padding="12,4" MinimumHeightRequest="36" />
+                    </HorizontalStackLayout>
+                    <BoxView HeightRequest="1" Color="#DDDDDD" />
+                    <FlexLayout Wrap="Wrap" JustifyContent="SpaceBetween" Padding="12" AlignItems="Start">
+                        <VerticalStackLayout Spacing="4" MinimumWidthRequest="250" FlexLayout.Grow="1">
+                            <Label Text="Impuesto y firmas" TextColor="#268DD0" FontSize="13" />
+                            <HorizontalStackLayout Spacing="6"><CheckBox x:Name="MiFirmaCheck" CheckedChanged="OnMiFirmaChanged"/><Label Text="Mi firma" TextColor="#777777" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <Button x:Name="CargarFirmaButton" Text="Cargar imagen de mi firma" Clicked="OnCargarFirmaClicked" IsVisible="False" HorizontalOptions="Start" />
+                            <Image x:Name="FirmaPreview" HeightRequest="80" IsVisible="False" HorizontalOptions="Start" />
+                            <HorizontalStackLayout Spacing="6"><CheckBox x:Name="FirmaClienteCheck" CheckedChanged="OnFirmaClienteChanged"/><Label Text="Firma del cliente" TextColor="#777777" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <Button x:Name="CargarFirmaClienteButton" Text="Cargar imagen de la firma del cliente" Clicked="OnCargarFirmaClienteClicked" IsVisible="False" HorizontalOptions="Start" />
+                            <Image x:Name="FirmaClientePreview" HeightRequest="80" IsVisible="False" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="10" MinimumWidthRequest="230" HorizontalOptions="End">
+                            <Label x:Name="SubtotalLabel" Text="Subtotal: RD$0.00" TextColor="#777777" HorizontalTextAlignment="End" />
+                            <Label x:Name="ItbisLabel" Text="ITBIS (18%): RD$0.00" TextColor="#777777" HorizontalTextAlignment="End" />
+                            <Label x:Name="TotalLabel" Text="Total: RD$0.00" TextColor="#588A1A" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="End" />
+                        </VerticalStackLayout>
+                    </FlexLayout>
+                    <BoxView HeightRequest="1" Color="#DDDDDD" />
+                    <VerticalStackLayout Padding="16" Spacing="6">
+                        <Label Text="Nota" TextColor="#777777" FontAttributes="Bold" />
+                        <Editor x:Name="NotaEditor" Placeholder="Nota que aparecerá en el PDF" AutoSize="TextChanges" />
+                        <Label x:Name="MensajeLabel" TextColor="#C0392B" />
+                        <FlexLayout Wrap="Wrap" JustifyContent="End" AlignItems="Center">
+                            <Button Text="Cancelar" Clicked="OnCancelarClicked" BackgroundColor="#F1F1F1" TextColor="#555555" Margin="3" />
+                            <Button x:Name="GuardarButton" Text="Guardar cotización" Clicked="OnGuardarClicked" BackgroundColor="#55B85B" TextColor="White" Margin="3" />
+                            <Button x:Name="ConvertirButton" Text="Convertir a Factura" Clicked="OnConvertirClicked" IsVisible="False" Margin="3" />
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </ScrollView>
+    </Grid>
+</ContentPage>

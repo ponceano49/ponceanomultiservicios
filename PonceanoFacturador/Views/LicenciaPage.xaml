@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PonceanoFacturador.Views.LicenciaPage" Title="Mi Licencia">
+    <ScrollView><VerticalStackLayout Padding="24" Spacing="14">
+        <Label Text="Mi Suscripción" FontSize="28" FontAttributes="Bold" />
+        <Border Padding="16"><VerticalStackLayout Spacing="8"><Label x:Name="TipoLabel" FontSize="20" FontAttributes="Bold"/><Label x:Name="EstadoLabel"/><Label x:Name="VencimientoLabel"/><Label x:Name="FacturasLabel"/><Label x:Name="CotizacionesLabel"/></VerticalStackLayout></Border>
+        <Label Text="Comparación de planes" FontSize="20" FontAttributes="Bold" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Border Padding="14"><VerticalStackLayout><Label Text="🆓 PRUEBA GRATUITA" FontAttributes="Bold"/><Label Text="Acceso completo por 30 días"/><Label Text="Una sola activación por dispositivo"/><Label Text="La fecha se valida con hora NTP"/><Label Text="Al vencer requiere licencia completa"/></VerticalStackLayout></Border>
+            <Border Grid.Column="1" Padding="14"><VerticalStackLayout><Label Text="⭐ PLAN PRO" FontAttributes="Bold"/><Label Text="US$5.99/mes, facturado anualmente"/><Label Text="Facturas y clientes ilimitados"/><Label Text="Sin límites"/><Label Text="Todos los dispositivos"/></VerticalStackLayout></Border>
+        </Grid>
+        <Label Text="La suscripción y los pagos se administran en el sitio web. La aplicación no confirma ni activa pagos localmente." FontSize="12" TextColor="#805500" />
+        <Button x:Name="SuscripcionButton" Text="SUSCRIBIRSE AHORA" Clicked="OnSuscripcionClicked" />
+        <Label x:Name="MensajeLabel" TextColor="#C0392B" />
+        <Button Text="CERRAR" Clicked="OnVolverClicked" />
+    </VerticalStackLayout></ScrollView>
+</ContentPage>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:PonceanoFacturador.Models"
+                       x:Class="PonceanoFacturador.Views.ArticulosPage" Title="Artículos">
+             <ContentPage.ToolbarItems>
+                 <ToolbarItem Text="+ Nuevo" Order="Primary" Priority="0" Clicked="OnNuevoClicked" />
+             </ContentPage.ToolbarItems>
+             <Grid Padding="16,8" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="0" BackgroundColor="White">
+                 <Grid x:Name="HeaderGrid" ColumnDefinitions="Auto,Auto,Auto,*,360" RowDefinitions="Auto" ColumnSpacing="8" Padding="0,4,0,10" SizeChanged="OnHeaderSizeChanged">
+                     <HorizontalStackLayout x:Name="TituloHeader" Grid.Column="0" Spacing="8" VerticalOptions="Center"><Label Text="▣" FontSize="22" TextColor="#687D90" VerticalOptions="Center" /><Label Text="Lista de artículo" FontSize="24" TextColor="#687D90" VerticalOptions="Center" /></HorizontalStackLayout>
+                     <Button x:Name="NuevoButton" Grid.Column="1" Text="+ Nuevo" Clicked="OnNuevoClicked" BackgroundColor="#55B85B" TextColor="White" CornerRadius="18" Padding="12,3" HeightRequest="32" MinimumHeightRequest="32" FontAttributes="Bold" />
+                     <VerticalStackLayout x:Name="ImportarExportarMenu" Grid.Column="2" Spacing="0" VerticalOptions="Start">
+                <VerticalStackLayout.GestureRecognizers><PointerGestureRecognizer PointerEntered="OnMenuPointerEntered" PointerExited="OnMenuPointerExited" /></VerticalStackLayout.GestureRecognizers>
+                <Button Text="ⓘ" Clicked="OnMenuClicked" BackgroundColor="White" TextColor="#536A7D" BorderColor="#D0A84D" BorderWidth="1" Padding="6,0" HeightRequest="32" MinimumHeightRequest="32" WidthRequest="34" />
+                <Border x:Name="ImportarExportarPopup" IsVisible="False" Stroke="#D4D4D4" StrokeShape="RoundRectangle 3" BackgroundColor="White" Padding="4" ZIndex="1"><VerticalStackLayout Spacing="0"><Button Text="Importar" Clicked="OnImportarClicked" BackgroundColor="White" TextColor="#3977B8" Padding="8,4" HorizontalOptions="Fill" /><Button Text="Exportar" Clicked="OnExportarClicked" BackgroundColor="White" TextColor="#3977B8" Padding="8,4" HorizontalOptions="Fill" /></VerticalStackLayout></Border>
+            </VerticalStackLayout>
+            <SearchBar x:Name="BuscarBar" Grid.Column="4" Placeholder="Buscar artículo" TextChanged="OnBuscarChanged" HeightRequest="38" VerticalOptions="Center" />
+        </Grid>
+        <Grid Grid.Row="1" ColumnDefinitions="*,112,88" Padding="8,8" BackgroundColor="White"><Label Text="Artículo" FontAttributes="Bold" TextColor="#777777" FontSize="12" VerticalOptions="Center" /><Label Grid.Column="1" Text="Importe" FontAttributes="Bold" TextColor="#777777" FontSize="12" HorizontalTextAlignment="End" VerticalOptions="Center" /><Label Grid.Column="2" Text="Acciones" FontAttributes="Bold" TextColor="#777777" FontSize="12" HorizontalTextAlignment="Center" VerticalOptions="Center" /></Grid>
+        <CollectionView x:Name="Lista" Grid.Row="2" SelectionMode="None">
+            <CollectionView.EmptyView><Label Text="Aún no tienes artículos. Crea el primero para reutilizar productos y servicios." HorizontalOptions="Center" VerticalOptions="Center" TextColor="#718096" /></CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Articulo">
+                    <Grid ColumnDefinitions="*,112,88" Padding="8,6" MinimumHeightRequest="54" BackgroundColor="#FAFAFA">
+                        <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding Descripcion}" TextColor="#60788F" FontSize="12" LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding ResumenInventario}" TextColor="#888888" FontSize="10" LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding Precio, StringFormat='RD${0:N2}'}" TextColor="#60788F" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="End" />
+                        <HorizontalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="End" VerticalOptions="Center">
+                            <Button Text="✎" Clicked="OnEditarFilaClicked" BackgroundColor="#378BC5" TextColor="White" CornerRadius="6" Padding="4,0" WidthRequest="36" HeightRequest="40" MinimumWidthRequest="36" MinimumHeightRequest="40" />
+                            <Button Text="▣" Clicked="OnEliminarFilaClicked" BackgroundColor="#E44D4D" TextColor="White" CornerRadius="6" Padding="4,0" WidthRequest="36" HeightRequest="40" MinimumWidthRequest="36" MinimumHeightRequest="40" />
+                        </HorizontalStackLayout>
+                        <BoxView Grid.ColumnSpan="3" VerticalOptions="End" HeightRequest="1" Color="#DDDDDD" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <Label x:Name="EstadoLabel" Grid.Row="3" TextColor="#C0392B" FontSize="12" Margin="4,6" />
+    </Grid>
+</ContentPage>

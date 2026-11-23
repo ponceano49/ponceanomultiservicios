@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PonceanoFacturador.Views.RegistroPage" Title="Crear cuenta">
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="12" MaximumWidthRequest="500">
+            <Label Text="Crear tu cuenta" FontSize="28" FontAttributes="Bold" />
+            <Label Text="Únete a Ponceano Multiservicios" />
+            <Entry x:Name="NombreEntry" Placeholder="Nombre completo" TextChanged="OnInputChanged" />
+            <Entry x:Name="CorreoEntry" Placeholder="Correo electrónico" Keyboard="Email" TextChanged="OnInputChanged" />
+            <Entry x:Name="ContrasenaEntry" Placeholder="Contraseña (mínimo 6 caracteres)" IsPassword="True" TextChanged="OnInputChanged" />
+            <Entry x:Name="ConfirmarEntry" Placeholder="Confirmar contraseña" IsPassword="True" TextChanged="OnInputChanged" />
+            <Button x:Name="TerminosButton" Text="Consultar Términos y Condiciones" Clicked="OnTermsClicked" />
+            <HorizontalStackLayout Spacing="8">
+                <CheckBox x:Name="TerminosCheck" CheckedChanged="OnTermsChanged" />
+                <Label Text="Acepto los Términos y Condiciones" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <Button x:Name="CrearButton" Text="Crear Cuenta" Clicked="OnRegisterClicked" IsEnabled="False" />
+            <ActivityIndicator x:Name="Loading" IsVisible="False" />
+            <Label x:Name="MensajeLabel" TextColor="#C0392B" />
+            <Button x:Name="ReintentarVerificacionButton" Text="REINTENTAR" Clicked="OnReintentarVerificacionClicked" IsVisible="False" />
+            <Button x:Name="CancelarVerificacionButton" Text="CANCELAR" Clicked="OnCancelarVerificacionClicked" IsVisible="False" />
+            <Button Text="¿Ya tienes cuenta? Inicia sesión aquí" Clicked="OnBackClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,26 @@
+<ContentPage x:Class="PonceanoFacturador.Views.ExportarDatosPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Exportar datos">
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+            <Label Text="Exportar datos a CSV" FontSize="26" FontAttributes="Bold" />
+            <Label Text="Selecciona el período y el tipo de información que deseas compartir." />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <VerticalStackLayout>
+                    <Label Text="Fecha de inicio" />
+                    <DatePicker x:Name="DesdePicker" Format="dd/MM/yyyy" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="Fecha final" />
+                    <DatePicker x:Name="HastaPicker" Format="dd/MM/yyyy" />
+                </VerticalStackLayout>
+            </Grid>
+            <Picker x:Name="TipoPicker" Title="¿Qué deseas exportar?" />
+            <Label Text="El archivo se preparará para compartirlo o guardarlo desde las opciones del dispositivo." FontSize="13" />
+            <Button Text="EXPORTAR" Clicked="OnExportarClicked" />
+            <Button Text="CANCELAR" Clicked="OnCancelarClicked" />
+            <Label x:Name="MensajeLabel" TextColor="#C0392B" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

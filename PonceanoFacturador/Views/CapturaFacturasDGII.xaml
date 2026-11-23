@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PonceanoFacturador.Views.CapturaFacturasDGII"
+             Title="Captura de Facturas DGII" Shell.NavBarIsVisible="False" BackgroundColor="White">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="24" Spacing="12" MaximumWidthRequest="800">
+            <Label Text="Captura de Facturas DGII" FontSize="26" TextColor="#667D91" HorizontalTextAlignment="Center" />
+            <Label x:Name="SesionLabel" TextColor="#60788F" />
+            <Entry x:Name="RncEntry" Placeholder="RNC del proveedor" Keyboard="Numeric" />
+            <Entry x:Name="RazonEntry" Placeholder="Razón social" />
+            <Label x:Name="ListaRncEstadoLabel" TextColor="#60788F" IsVisible="False" />
+            <Button x:Name="GuardarRncButton" Text="Guardar este RNC en el CSV local" Clicked="OnGuardarRncClicked" BackgroundColor="#467FA6" TextColor="White" IsVisible="False" />
+            <Entry x:Name="NcfEntry" Placeholder="Comprobante fiscal (NCF)" />
+            <Entry x:Name="SubtotalEntry" Placeholder="Subtotal" Keyboard="Numeric" />
+            <Entry x:Name="ItbisEntry" Placeholder="ITBIS" Keyboard="Numeric" />
+            <Entry x:Name="TotalEntry" Placeholder="Total" Keyboard="Numeric" />
+            <Label x:Name="MonedaLabel" Text="Moneda: DOP - Pesos | Tasa de cambio: 1.00" TextColor="#60788F" />
+            <Picker x:Name="MonedaPicker" Title="Moneda" SelectedIndexChanged="OnMonedaChanged">
+                <Picker.Items><x:String>DOP</x:String><x:String>USD</x:String></Picker.Items>
+            </Picker>
+            <Button x:Name="CapturarCompraButton" Text="📷 Captura inteligente de compra para 606" Clicked="OnCapturarCompraClicked" BackgroundColor="#267344" TextColor="White" IsVisible="False" />
+            <Button x:Name="CargarButton" Text="Cargar facturas (PDF/Imagen)" Clicked="OnCargarClicked" BackgroundColor="#467FA6" TextColor="White" />
+            <Label x:Name="ArchivoLabel" Text="Sin archivos seleccionados. También puedes arrastrar archivos a esta página." TextColor="#60788F" />
+            <VerticalStackLayout x:Name="Compra606Seccion" Spacing="8" IsVisible="False">
+                <Label Text="Datos necesarios para registrar esta compra en el borrador 606" FontAttributes="Bold" TextColor="#267344" />
+                <DatePicker x:Name="FechaCompraPicker" Format="dd/MM/yyyy" />
+                <Entry x:Name="MontoExentoCompraEntry" Placeholder="Monto exento (si aplica)" Keyboard="Numeric" Text="0.00" />
+                <Picker x:Name="TipoCompraPicker" Title="Clasificación oficial de compra 606" />
+                <Picker x:Name="BaseCompraPicker" Title="El monto gravado corresponde a" />
+                <Picker x:Name="MetodoPagoCompraPicker" Title="Método de pago 606" />
+                <Button x:Name="ImportarCompra606Button" Text="CARGAR Y GUARDAR ARCHIVO 606 (COMPRAS)" Clicked="OnImportarCompra606Clicked" BackgroundColor="#267344" TextColor="White" />
+            </VerticalStackLayout>
+            <Button x:Name="VerFacturaButton" Text="Ver factura actual" Clicked="OnVerFacturaClicked" BackgroundColor="#467FA6" TextColor="White" IsVisible="False" />
+            <Label x:Name="ProgresoLoteLabel" Text="" TextColor="#60788F" />
+            <Label x:Name="ProgresoLabel" Text="" TextColor="#60788F" />
+            <Label x:Name="ResultadoLoteLabel" TextColor="#60788F" IsVisible="False" />
+            <Label x:Name="PlantillaNombreLabel" Text="" TextColor="#267344" FontAttributes="Bold" IsVisible="False" />
+            <Label x:Name="PlantillaMensajeLabel" Text="" TextColor="#267344" IsVisible="False" />
+            <Label x:Name="AdvertenciasLabel" Text="" TextColor="#9A5A00" IsVisible="False" />
+            <VerticalStackLayout x:Name="TextoOcrSeccion" Spacing="4" IsVisible="False">
+                <Label Text="Texto extraído por Tesseract OCR" FontAttributes="Bold" TextColor="#60788F" />
+                <Editor x:Name="TextoOcrEditor" IsReadOnly="True" AutoSize="TextChanges" MinimumHeightRequest="120" MaximumHeightRequest="320" BackgroundColor="#F4F7F9" TextColor="#263746" />
+            </VerticalStackLayout>
+            <Button x:Name="GuardarButton" Text="Guardar factura" Clicked="OnGuardarClicked" BackgroundColor="#467FA6" TextColor="White" />
+            <Button x:Name="OmitirButton" Text="Omitir esta factura" Clicked="OnOmitirClicked" BackgroundColor="#467FA6" TextColor="White" IsVisible="False" />
+            <Button Text="Libro 606 Compra / Libro 607 Venta" Clicked="OnEnvio606Clicked" BackgroundColor="#467FA6" TextColor="White" />
+            <Button Text="Reportes y Declaraciones" Clicked="OnReportesClicked" BackgroundColor="#467FA6" TextColor="White" />
+            <Label Text="🟡 MÓDULO DE AUTENTICACIÓN AUTOMÁTICA (EN ESPERA DE AUTORIZACIÓN DGII): Estructura reservada para la futura API oficial. La autenticación automática no está habilitada y requerirá autorización escrita de la DGII." TextColor="#9A5A00" />
+            <Button Text="⚙️ Configuración de credenciales para API DGII (reservada)" Clicked="OnConfiguracionApiDgiiClicked" BackgroundColor="#467FA6" TextColor="White" />
+            <Label x:Name="EstadoLabel" Text="Cargando facturas..." TextColor="#60788F" />
+            <Label Text="NCF | Proveedor | Monto" FontAttributes="Bold" TextColor="#60788F" />
+            <CollectionView x:Name="FacturasLista" HeightRequest="220" SelectionMode="None">
+                <CollectionView.EmptyView><Label Text="No hay capturas guardadas." /></CollectionView.EmptyView>
+                <CollectionView.ItemTemplate><DataTemplate><Label Text="{Binding Resumen}" Padding="6" /></DataTemplate></CollectionView.ItemTemplate>
+            </CollectionView>
+            <Button Text="Cambiar contraseña" Clicked="OnCambiarContrasenaClicked" BackgroundColor="#467FA6" TextColor="White" />
+            <Label Text="La captura inteligente de compras solo se incorpora al 606 después de revisar y confirmar los datos; las demás capturas manuales siguen siendo independientes." FontSize="12" TextColor="#805500" />
+            </VerticalStackLayout>
+        </ScrollView>
+        <Grid x:Name="CapturaInteligenteOverlay" IsVisible="False" BackgroundColor="#CC000000" Padding="18">
+            <Border BackgroundColor="White" Stroke="#D5DEE5" StrokeThickness="1" Padding="20" MaximumWidthRequest="620" VerticalOptions="Center" HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="CAPTURA INTELIGENTE — COMPRA 606" FontSize="22" FontAttributes="Bold" TextColor="#263746" />
+                    <Label Text="COLOQUE LA FACTURA / RECIBO DENTRO DEL MARCO" FontAttributes="Bold" TextColor="#263746" HorizontalTextAlignment="Center" />
+                    <Grid HeightRequest="260" WidthRequest="340" HorizontalOptions="Center" BackgroundColor="#111111">
+                        <Image x:Name="VistaCamaraImage" Aspect="AspectFit" />
+                        <Border x:Name="MarcoCapturaBorder" Margin="28,54" Stroke="#FFFFFF" StrokeThickness="3" InputTransparent="True" />
+                    </Grid>
+                    <Label x:Name="CuentaRegresivaLabel" Text="10" FontSize="42" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#C62828" />
+                    <Label x:Name="EstadoCapturaInteligenteLabel" Text="Buscando los bordes del documento…" HorizontalTextAlignment="Center" TextColor="#60788F" />
+                    <Button x:Name="FijarDocumentoButton" Text="✅ FIJAR DOCUMENTO" Clicked="OnFijarDocumentoClicked" BackgroundColor="#267344" TextColor="White" IsVisible="False" />
+                    <Button x:Name="TomarFotoGuardarButton" Text="📸 TOMAR FOTO Y GUARDAR" Clicked="OnTomarFotoGuardarClicked" BackgroundColor="#267344" TextColor="White" IsVisible="False" />
+                    <Button x:Name="ReiniciarCapturaButton" Text="🔄 REINICIAR" Clicked="OnReiniciarCapturaClicked" BackgroundColor="#467FA6" TextColor="White" IsVisible="False" />
+                    <Button Text="Cancelar captura" Clicked="OnCancelarCapturaInteligenteClicked" BackgroundColor="#60788F" TextColor="White" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+        <Grid x:Name="ResumenOverlay" IsVisible="False" BackgroundColor="#99000000" Padding="18">
+            <Border BackgroundColor="White" Stroke="#D5DEE5" StrokeThickness="1" Padding="20" MaximumWidthRequest="760" MaximumHeightRequest="820" VerticalOptions="Center" HorizontalOptions="Center">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Resumen del procesamiento" FontSize="23" FontAttributes="Bold" TextColor="#667D91" HorizontalTextAlignment="Center" />
+                        <Label x:Name="ResultadoResumenLabel" TextColor="#60788F" IsVisible="False" />
+                        <Label Text="✅ Facturas procesadas correctamente" FontSize="17" FontAttributes="Bold" TextColor="#267344" />
+                        <CollectionView x:Name="ExitosLista" HeightRequest="160" SelectionMode="Single" SelectionChanged="OnExitoSeleccionado">
+                            <CollectionView.EmptyView><Label Text="No hay facturas guardadas correctamente en este lote." TextColor="#60788F" /></CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate><DataTemplate><Label Text="{Binding Resumen}" Padding="6" TextColor="#263746" /></DataTemplate></CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Label x:Name="TotalExitosLabel" Text="✅ Facturas guardadas correctamente: 0" TextColor="#267344" />
+                        <Label x:Name="PendientesLoteLabel" Text="⚠️ Facturas pendientes por validar: 0" TextColor="#9A5A00" />
+                        <Label x:Name="DuplicadasLoteLabel" Text="❌ Facturas duplicadas saltadas: 0" TextColor="#9A5A00" />
+                        <Label x:Name="DuplicadasDetalleLabel" TextColor="#9A5A00" IsVisible="False" />
+                        <VerticalStackLayout x:Name="SeccionRevision" Spacing="8" IsVisible="False">
+                            <BoxView HeightRequest="1" Color="#D5DEE5" />
+                            <Label Text="⚠️ Facturas con datos incompletos o problemas" FontSize="17" FontAttributes="Bold" TextColor="#9A5A00" />
+                            <Label Text="Selecciona una fila para completar los datos. Los cambios se guardan al pulsar Guardar." FontSize="13" TextColor="#60788F" />
+                            <CollectionView x:Name="RevisionesLista" HeightRequest="240" SelectionMode="Single" SelectionChanged="OnRevisionSeleccionada">
+                                <CollectionView.EmptyView><Label Text="No hay facturas pendientes de revisión." /></CollectionView.EmptyView>
+                                <CollectionView.ItemTemplate><DataTemplate><VerticalStackLayout Padding="7" Spacing="2"><Label Text="{Binding Resumen}" TextColor="#263746" /><Label Text="{Binding Detalle}" FontSize="12" TextColor="#9A5A00" /></VerticalStackLayout></DataTemplate></CollectionView.ItemTemplate>
+                            </CollectionView>
+                            <Label x:Name="TotalRevisionLabel" Text="Total: 0 facturas requieren revisión manual" TextColor="#9A5A00" />
+                        </VerticalStackLayout>
+                        <Label Text="Selecciona una factura guardada para revisar o editarla." FontSize="12" TextColor="#60788F" />
+                        <Button Text="Cerrar" Clicked="OnCerrarResumenClicked" BackgroundColor="#467FA6" TextColor="White" />
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

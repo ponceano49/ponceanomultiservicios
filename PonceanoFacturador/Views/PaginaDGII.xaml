@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PonceanoFacturador.Views.PaginaDGII"
+             Title="DGII Automática" Shell.NavBarIsVisible="False" BackgroundColor="White">
+    <ContentPage.Resources>
+        <Style x:Key="BotonDGII" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="#467FA6" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="HeightRequest" Value="50" />
+            <Setter Property="MinimumHeightRequest" Value="50" />
+            <Setter Property="HorizontalOptions" Value="Fill" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+    </ContentPage.Resources>
+    <Grid Padding="12" RowDefinitions="Auto,*,Auto" RowSpacing="8">
+        <Label Grid.Row="0" Text="Reportes DGII Automática" FontSize="26" TextColor="#667D91" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="12">
+                <Grid x:Name="PanelesDGII" ColumnDefinitions="240,*,240" RowDefinitions="*" ColumnSpacing="12" RowSpacing="12" SizeChanged="OnPanelesDGIISizeChanged">
+                    <Border x:Name="PanelIzquierdo" Grid.Column="0" Stroke="#DFE4E8" StrokeThickness="1" BackgroundColor="White" Padding="10">
+                        <Grid RowDefinitions="70,70,70,70,70,70,70" RowSpacing="6">
+                            <Button x:Name="ProcesarButton" Grid.Row="0" Text="📁 Procesar carpeta de facturas" Clicked="OnProcesarCarpetaClicked" Style="{StaticResource BotonDGII}" />
+                            <Button x:Name="MonitoreoButton" Grid.Row="1" Text="🔄 Activar monitoreo automático" Clicked="OnMonitoreoClicked" Style="{StaticResource BotonDGII}" />
+                            <VerticalStackLayout Grid.Row="2" Spacing="2" VerticalOptions="Center">
+                                <Label Text="💵 Tasa de cambio USD → DOP" FontSize="12" TextColor="#60788F" HorizontalTextAlignment="Center" />
+                                <Entry x:Name="TasaCambioEntry" Text="59.85" Keyboard="Numeric" Placeholder="Ej.: 59.85" TextChanged="OnTasaCambioChanged" HorizontalTextAlignment="Center" />
+                                <Label x:Name="TasaManualLabel" FontSize="10" TextColor="#60788F" LineBreakMode="TailTruncation" MaxLines="1" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="3" Spacing="2" VerticalOptions="Center">
+                                <Label Text="📊 Período del libro interno" FontSize="12" TextColor="#60788F" HorizontalTextAlignment="Center" />
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+                                    <VerticalStackLayout><Label Text="Desde" FontSize="10" HorizontalTextAlignment="Center" /><DatePicker x:Name="PeriodoDesdePicker" FontSize="12" /></VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1"><Label Text="Hasta" FontSize="10" HorizontalTextAlignment="Center" /><DatePicker x:Name="PeriodoHastaPicker" FontSize="12" /></VerticalStackLayout>
+                                </Grid>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="4" Spacing="2" VerticalOptions="Center">
+                                <Label Text="🔽 Filtrar por turno (opcional)" FontSize="12" TextColor="#60788F" HorizontalTextAlignment="Center" />
+                                <Picker x:Name="TurnoFiltroPicker" Title="Todos los turnos" />
+                            </VerticalStackLayout>
+                            <Button Grid.Row="5" Text="🖨️ Seleccionar impresora predeterminada" Clicked="OnSeleccionarImpresoraClicked" Style="{StaticResource BotonDGII}" />
+                            <Button Grid.Row="6" Text="🖨️ Ver / Imprimir último borrador 607" Clicked="OnImprimir607Clicked" Style="{StaticResource BotonDGII}" />
+                        </Grid>
+                    </Border>
+                    <Border x:Name="CentroPanel" Grid.Column="1" Stroke="#DFE4E8" StrokeThickness="1" BackgroundColor="White" Padding="14">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="📷 Selecciona una imagen o PDF para extraer y consultar su texto." FontSize="13" TextColor="#60788F" HorizontalTextAlignment="Center" />
+                            <Editor x:Name="TextoTesseractEditor" IsReadOnly="True" AutoSize="Disabled" HeightRequest="300" Placeholder="El texto reconocido aparecerá aquí." BackgroundColor="#F5F7F9" />
+                            <Label Text="Verifica los datos extraídos antes de usar los reportes para fines fiscales." FontSize="12" TextColor="#805500" HorizontalTextAlignment="Center" />
+                            <Label x:Name="EstadoTesseractLabel" Text="Selecciona una imagen o PDF para leerlo." TextColor="#60788F" HorizontalTextAlignment="Center" />
+                            <Button x:Name="LeerTesseractButton" Text="📷 Leer Factura con Tesseract OCR" Clicked="OnLeerTesseractClicked" Style="{StaticResource BotonDGII}" HorizontalOptions="Center" MaximumWidthRequest="320" />
+                            <CollectionView x:Name="RegistrosFiscalesLista" IsVisible="False" HeightRequest="130" SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Label Text="{Binding ResumenVisual}" FontSize="12" TextColor="#60788F" Padding="6" />
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border x:Name="PanelDerecho" Grid.Column="2" Stroke="#DFE4E8" StrokeThickness="1" BackgroundColor="White" Padding="10">
+                        <Grid RowDefinitions="70,70,70,70,70,70" RowSpacing="6">
+                            <Button Grid.Row="0" Text="📄 Consultar libro 606" Clicked="OnConsultar606Clicked" Style="{StaticResource BotonDGII}" />
+                            <Button Grid.Row="1" Text="📄 Consultar libro 607" Clicked="OnConsultar607Clicked" Style="{StaticResource BotonDGII}" />
+                            <Button Grid.Row="2" Text="📝 Generar borrador 606" Clicked="OnGenerar606Clicked" Style="{StaticResource BotonDGII}" />
+                            <Button Grid.Row="3" Text="📝 Generar borrador 607" Clicked="OnGenerar607Clicked" Style="{StaticResource BotonDGII}" />
+                            <Button Grid.Row="4" Text="🖨️ Ver / Imprimir último borrador 606" Clicked="OnImprimir606Clicked" Style="{StaticResource BotonDGII}" />
+                            <Button Grid.Row="5" Text="📂 Ver reportes generados" Clicked="OnVerReportesClicked" Style="{StaticResource BotonDGII}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+        <Border Grid.Row="2" Stroke="#DFE4E8" BackgroundColor="#FAFAFA" Padding="8">
+                <VerticalStackLayout Spacing="2">
+                    <Label x:Name="RutaLabel" FontSize="11" TextColor="#777777" LineBreakMode="TailTruncation" MaxLines="1" />
+                    <Label x:Name="EstadoLabel" Text="Listo para generar reportes DGII" TextColor="#60788F" />
+                </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

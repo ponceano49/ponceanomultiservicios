@@ -1,0 +1,183 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net11.0-android</TargetFrameworks>
+		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net11.0-ios;net11.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net11.0-windows10.0.19041.0</TargetFrameworks>
+
+		<!-- Note for MacCatalyst:
+		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
+		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
+		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
+		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
+		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>PonceanoFacturador</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+
+
+		<!-- Display name -->
+		<ApplicationTitle>PonceanoFacturador</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.companyname.ponceanofacturador</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.2</ApplicationDisplayVersion>
+		<ApplicationVersion>3</ApplicationVersion>
+		<Version>1.2.0</Version>
+
+		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
+		<WindowsPackageType>None</WindowsPackageType>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' And '$(PonceanoDesactivarPruebas)' == 'true'">
+		<DefineConstants>$(DefineConstants);PONCEANO_DESACTIVAR_PRUEBAS</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\AppIcon\appicon.png" Color="#FFFFFF" BaseSize="512,512" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" BaseSize="222,185" />
+
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<MauiAsset Include="Lista_RNC_Proveedores.csv" LogicalName="Lista_RNC_Proveedores.csv" />
+		<MauiAsset Include="RNC_CONTRIBUYENTES.zip" LogicalName="RNC_CONTRIBUYENTES.zip" />
+		<MauiAsset Include="Formato-de-Envio-606-(NG-07-2018-y-05-2019)\Formato-de-Envio-606-(NG-07-2018-y-05-2019)\Formato-de-Envio-606-(NG-07-2018-y-05-2019).xls" LogicalName="DGIIFormato606.xls" />
+		<MauiAsset Include="Formato-de-Envio-607-(NG-07-2018-y-05-2019)\Herramienta de Envio Formato 607.xls" LogicalName="DGIIFormato607.xls" />
+		<MauiAsset Include="Resources\Fonts\OpenSans-Regular.ttf" LogicalName="pdf-opensans.ttf" />
+		<MauiAsset Include="Resources\Fonts\OpenSans-Semibold.ttf" LogicalName="pdf-opensans-semibold.ttf" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="tessdata\spa.traineddata" Link="tessdata\spa.traineddata" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Tesseract" Version="5.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="11.0.0" />
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+		<PackageReference Include="DocumentFormat.OpenXml" Version="3.1.1" />
+		<PackageReference Include="SkiaSharp" Version="3.119.1" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Android" Version="3.119.1" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
+		<PackageReference Include="SkiaSharp.NativeAssets.iOS" Version="3.119.1" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
+		<PackageReference Include="SkiaSharp.NativeAssets.MacCatalyst" Version="3.119.1" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
+		<PackageReference Include="OpenCvSharp4" Version="4.13.0.20261107" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
+		<PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20261107" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\ActivacionLicenciaPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\AjustesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ArticulosPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\CapturaFacturasDGII.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ClienteEditarPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ClientesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\CompaniaPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\CotizacionEditarPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\CotizacionesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ExportarDatosPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\FacturaEditarPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\FacturasPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\LicenciaPage.xaml">
+		<Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\NotaCreditoEditarPage.xaml">
+		<Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\NotasCreditoPage.xaml">
+		<Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\PaginaDGII.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ResumenPage.xaml">
+		<Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="**\bin\**\*.cs;**\obj\**\*.cs" />
+	</ItemGroup>
+
+	<PropertyGroup>
+	  <PonceanoDispositivoMtp Condition="'$(PonceanoDispositivoMtp)' == ''">A55 de Wellington</PonceanoDispositivoMtp>
+	  <PonceanoAlmacenamientoMtp Condition="'$(PonceanoAlmacenamientoMtp)' == ''">Almacenamiento interno</PonceanoAlmacenamientoMtp>
+	  <PonceanoCarpetaMtp Condition="'$(PonceanoCarpetaMtp)' == ''">InstalarApp</PonceanoCarpetaMtp>
+	</PropertyGroup>
+
+	<Target Name="CopiarApkSamsungDespuesDeBuild" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('windows')) And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(DesignTimeBuild)' != 'true' And '$(AndroidApplication)' == 'true'">
+	  <CallTarget Targets="SignAndroidPackage" Condition="'$(BuildingInsideVisualStudio)' == 'true' And '$(AndroidPackageFormat)' == 'apk'" ContinueOnError="WarnAndContinue" />
+	  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' And '$(AndroidPackageFormat)' == 'apk'">
+		<_PonceanoFirmaCorrecta>$(MSBuildLastTaskResult)</_PonceanoFirmaCorrecta>
+	  </PropertyGroup>
+	  <Warning Condition="'$(AndroidPackageFormat)' != 'apk' Or '$(_PonceanoFirmaCorrecta)' == 'false' Or !Exists('$(ApkFileSigned)')" Text="No se generó un APK firmado para copiar al Samsung. Cree un paquete APK y cópielo manualmente." />
+	  <Exec Condition="'$(AndroidPackageFormat)' == 'apk' And '$(_PonceanoFirmaCorrecta)' != 'false' And Exists('$(ApkFileSigned)')" Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\CopiarApkSamsung.ps1&quot; -Apk &quot;$(ApkFileSigned)&quot; -Dispositivo &quot;$(PonceanoDispositivoMtp)&quot; -Almacenamiento &quot;$(PonceanoAlmacenamientoMtp)&quot; -Carpeta &quot;$(PonceanoCarpetaMtp)&quot;" IgnoreExitCode="true">
+		<Output TaskParameter="ExitCode" PropertyName="_PonceanoCopiaBuildResultado" />
+	  </Exec>
+	  <Warning Condition="'$(_PonceanoCopiaBuildResultado)' != '' And '$(_PonceanoCopiaBuildResultado)' != '0'" Text="No se pudo copiar o verificar el APK en el Samsung después de Build; cópielo manualmente." />
+	</Target>
+
+	<Target Name="CopiarApkSamsungDespuesDePublish" AfterTargets="Publish" Condition="$([MSBuild]::IsOSPlatform('windows')) And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(DesignTimeBuild)' != 'true' And '$(AndroidApplication)' == 'true'">
+	  <PropertyGroup>
+		<_PonceanoApkPublicado>$(PublishDir)$(ApplicationId)-Signed.apk</_PonceanoApkPublicado>
+	  </PropertyGroup>
+	  <Warning Condition="!Exists('$(_PonceanoApkPublicado)')" Text="No se encontró el APK firmado publicado para copiar al Samsung; cópielo manualmente." />
+	  <Exec Condition="Exists('$(_PonceanoApkPublicado)')" Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\CopiarApkSamsung.ps1&quot; -Apk &quot;$(_PonceanoApkPublicado)&quot; -Dispositivo &quot;$(PonceanoDispositivoMtp)&quot; -Almacenamiento &quot;$(PonceanoAlmacenamientoMtp)&quot; -Carpeta &quot;$(PonceanoCarpetaMtp)&quot;" IgnoreExitCode="true">
+		<Output TaskParameter="ExitCode" PropertyName="_PonceanoCopiaPublishResultado" />
+	  </Exec>
+	  <Warning Condition="'$(_PonceanoCopiaPublishResultado)' != '' And '$(_PonceanoCopiaPublishResultado)' != '0'" Text="No se pudo copiar o verificar el APK en el Samsung después de Publish; cópielo manualmente." />
+	</Target>
+
+</Project>

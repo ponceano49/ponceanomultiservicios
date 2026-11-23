@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:PonceanoFacturador.Models"
+                       x:Class="PonceanoFacturador.Views.FacturasPage" Title="Facturación"
+                       Shell.NavBarIsVisible="False">
+             <ContentPage.ToolbarItems>
+                 <ToolbarItem Text="+ Nuevo" Order="Primary" Priority="0" Clicked="OnNuevaClicked" />
+             </ContentPage.ToolbarItems>
+             <Grid Padding="18,14" RowDefinitions="Auto,*,Auto" RowSpacing="14" BackgroundColor="#FFFFFF">
+        <Grid x:Name="HeaderGrid" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="4" SizeChanged="OnHeaderSizeChanged">
+            <FlexLayout x:Name="HeaderActions" Wrap="Wrap" AlignItems="Center">
+                <Label x:Name="FacturaIconoLabel" Text="▤" FontSize="23" TextColor="#678096" VerticalOptions="Center" />
+                <Label x:Name="FacturaTituloLabel" Text="Factura" FontSize="24" TextColor="#667D91" VerticalOptions="Center" />
+                <Button Text="🖨️ Impresoras" Clicked="OnImpresorasClicked" BackgroundColor="#F1F1F1" TextColor="#607080" CornerRadius="16" Padding="10,3" HeightRequest="32" MinimumHeightRequest="32" MinimumWidthRequest="0" FontSize="11" />
+                <Button x:Name="NuevoContentButton" Text="+ Nuevo" Clicked="OnNuevaClicked" BackgroundColor="#55B85B" TextColor="White" CornerRadius="18" Padding="12,3" HeightRequest="32" MinimumHeightRequest="32" MinimumWidthRequest="0" FontAttributes="Bold" />
+            </FlexLayout>
+            <VerticalStackLayout x:Name="SearchFilters" Grid.Column="1" Spacing="1" HorizontalOptions="End">
+                <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
+                    <Picker x:Name="FiltroPicker" Title="Todo" SelectedIndexChanged="OnFiltroChanged" WidthRequest="72" HeightRequest="34" MinimumHeightRequest="34" FontSize="12" />
+                    <Border Stroke="#D4D4D4" StrokeShape="RoundRectangle 18" Padding="8,0" HeightRequest="32" WidthRequest="160" VerticalOptions="Center" BackgroundColor="White">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry x:Name="BuscarEntry" Placeholder="Buscar factura" TextChanged="OnBuscarChanged" FontSize="12" HeightRequest="30" MinimumHeightRequest="30" />
+                            <Border Grid.Column="1" Stroke="#D4D4D4" StrokeThickness="1" StrokeShape="RoundRectangle 12" WidthRequest="24" HeightRequest="24" Padding="0" VerticalOptions="Center" BackgroundColor="#F3F3F3">
+                                <Label Text="⌕" FontSize="17" TextColor="#8A9AAA" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="3" HorizontalOptions="End" VerticalOptions="Center">
+                    <CheckBox x:Name="BusquedaProfundaCheck" CheckedChanged="OnBusquedaProfundaChanged" Scale="0.7" MinimumHeightRequest="20" MinimumWidthRequest="20" />
+                    <Label Text="Deep Search" FontSize="10" TextColor="#687D90" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+            <Label x:Name="DiasPruebaLabel" Grid.Row="1" Grid.ColumnSpan="2" IsVisible="False" FontAttributes="Bold" FontSize="12" TextColor="#9A5A00" />
+        </Grid>
+        <Border x:Name="TablaContainer" Grid.Row="1" Stroke="#DCE1E6" StrokeThickness="1" Padding="0" BackgroundColor="#FFFFFF">
+            <Grid RowDefinitions="48,*">
+                <Grid ColumnDefinitions="0.95*,1.1*,1.35*,4*,1.25*,34" Padding="12,4" BackgroundColor="#FFFFFF">
+                    <Label Text="Estado" FontAttributes="Bold" TextColor="#777777" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Label Grid.Column="1" Text="Fecha" FontAttributes="Bold" TextColor="#777777" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text="No." FontAttributes="Bold" TextColor="#777777" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Label Grid.Column="3" Text="Cliente" FontAttributes="Bold" TextColor="#777777" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Label Grid.Column="4" Text="Importe" FontAttributes="Bold" TextColor="#777777" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="End" />
+                </Grid>
+                <BoxView Grid.Row="0" VerticalOptions="End" HeightRequest="1" Color="#D6D6D6" />
+                <CollectionView x:Name="Lista" Grid.Row="1" SelectionMode="None">
+                    <CollectionView.EmptyView><VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"><Label Text="Aún no hay facturas." TextColor="#718096" HorizontalOptions="Center" /><Button Text="+ Nuevo" Clicked="OnNuevaClicked" BackgroundColor="#55B85B" TextColor="White" /></VerticalStackLayout></CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Factura">
+                            <Grid ColumnDefinitions="0.95*,1.1*,1.35*,4*,1.25*,34" Padding="12,4" HeightRequest="52" BackgroundColor="{Binding ColorFondoFila}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnFilaTapped" />
+                                </Grid.GestureRecognizers>
+                                <Border BackgroundColor="{Binding EstadoColor}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="7,2" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="{Binding EstadoCorto}" TextColor="White" FontSize="10" FontAttributes="Bold" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                                </Border>
+                                <Label Grid.Column="1" Text="{Binding Fecha, StringFormat='{0:MM/dd/yyyy}'}" TextColor="#60788F" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                                <Label Grid.Column="2" Text="{Binding NCF}" TextColor="#60788F" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="3" Text="{Binding ClienteNombre}" TextColor="#60788F" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="4" Text="{Binding ImporteVisual}" TextColor="#298333" FontSize="12" VerticalOptions="Center" HorizontalTextAlignment="End" />
+                                <Button Grid.Column="5" Text="⋮" TextColor="#54718A" BackgroundColor="Transparent" Padding="0" HeightRequest="30" MinimumHeightRequest="30" MinimumWidthRequest="24" Clicked="OnFilaAccionesClicked" FontSize="18" />
+                                <BoxView Grid.ColumnSpan="6" VerticalOptions="End" HeightRequest="1" Color="#E2E2E2" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Border>
+        <Label x:Name="EstadoLabel" Grid.Row="2" TextColor="#C0392B" FontSize="12" />
+    </Grid>
+</ContentPage>
